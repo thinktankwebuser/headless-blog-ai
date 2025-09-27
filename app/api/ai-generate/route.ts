@@ -1,3 +1,12 @@
+/**
+ * This function is a “summariser service”.
+ *
+ * You hand it an article and say “overview” or “takeaways.”
+ *
+ * It makes sure you’re not spamming or overspending,
+ * asks ChatGPT to write in a very specific format,
+ * and then gives the result back as clean JSON.
+ */
 import OpenAI from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -7,7 +16,7 @@ const openai = new OpenAI({
 
 // Simple rate limiting (in-memory, resets on restart)
 const rateLimit = new Map<string, number>();
-const RATE_LIMIT_MS = 5000; // 10 seconds between requests
+const RATE_LIMIT_MS = 5000; // 5 seconds between requests
 
 // Content length limit to prevent excessive token usage
 const MAX_CONTENT_LENGTH = 8000;
@@ -30,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { content, type, slug } = body;
+    const { content, type, slug, question } = body;
 
     // Validate input
     if (!content || !type) {
@@ -40,9 +49,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!['overview', 'takeaways'].includes(type)) {
+    if (!['overview', 'takeaways', 'questions', 'custom_question'].includes(type)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid type. Must be "overview" or "takeaways"' },
+        { success: false, error: 'Invalid type. Must be "overview", "takeaways", "questions", or "custom_question"' },
+        { status: 400 }
+      );
+    }
+
+    // Validate custom_question specific requirements
+    if (type === 'custom_question' && !question) {
+      return NextResponse.json(
+        { success: false, error: 'Missing question parameter for custom_question type' },
         { status: 400 }
       );
     }
@@ -55,35 +72,151 @@ export async function POST(request: NextRequest) {
     const systemByType =
       type === 'overview'
         ? [
-            "You summarise articles for an 18-year-old reader. No preamble.",
-            "Write the Detailed Summary FIRST, titled '📖 Detailed Summary'.",
-            "It MUST be 150–200 words in EXACTLY four sections with headers:",
-            "'What it says', 'How it argues', 'Why it matters', 'Limits/Risks'.",
-            "Write EXACTLY 3 sentences per section, each 12–16 words."
+            "You are an engaging, modern content summarizer creating comprehensive yet readable summaries.",
+            "Write in natural, flowing prose that explains concepts clearly and thoroughly.",
+            "Use relevant emojis sparingly and focus on coherent explanations rather than bullet points.",
+            "Make content feel fresh and informative - focus on unique angles and specific details.",
+            "Structure: Quick Overview (2-3 coherent paragraphs) + Detailed Summary (4 focused sections with flowing text).",
+            "Style: conversational, confident, with clear explanations and full sentences.",
+            "Avoid corporate jargon, bullet points, and fragmented text - write complete thoughts and explanations."
+          ].join(" ")
+        : type === 'takeaways'
+        ? [
+            "You are an engaging content curator creating actionable takeaways.",
+            "Focus on practical, specific insights readers can actually use.",
+            "Use compelling language with personality - avoid boring corporate speak.",
+            "3-6 bullets maximum, each offering real value or a fresh perspective."
+          ].join(" ")
+        : type === 'custom_question'
+        ? [
+            "You are an expert AI assistant providing detailed, helpful responses to specific questions about content.",
+            "Answer the user's question directly and comprehensively using the provided content.",
+            "Be specific, practical, and engaging in your response.",
+            "Use examples from the content when relevant.",
+            "If the question can't be fully answered from the content, acknowledge this and provide what insight you can."
           ].join(" ")
         : [
-            "Return a Markdown section titled '✅ Your takeaways' with 3–5 bullet points.",
-            "Each bullet starts with a verb, ≤14 words, article-derived only, no external facts.",
-            "No preamble or extra text."
+            "You are a curious reader who generates natural, valuable questions about content.",
+            "Create questions that real readers would genuinely want to ask after reading.",
+            "Focus on practical applications, deeper understanding, and clarifications.",
+            "Questions should be conversational, specific, and genuinely useful.",
+            "Avoid generic questions - make them relevant to the specific content provided."
           ].join(" ");
 
     const overviewPrompt = `
-    Return (Markdown):
-    ⚡ Quick overview — 3 bullets, ≤12 words, plain words + light emojis.
-    🚩 Limits/Gaps — only if present; no external facts.
+    Create an engaging, visually appealing overview with this exact structure:
 
-    (Generate the Detailed Summary first as per system.)
+    <div class="ai-cards">
+      <section class="ai-card quick-overview-card" aria-label="Quick Overview">
+        <div class="card-header">
+          <h4><span class="icon">⚡</span>Quick Overview</h4>
+        </div>
+        <div class="overview-content">
+          <!-- Write 2-3 coherent paragraphs explaining the key insights -->
+          <!-- Use flowing prose with <strong> emphasis on important concepts -->
+          <!-- Example: <p>The content explores how AI transforms payments by...</p> -->
+        </div>
+      </section>
+
+      <section class="ai-card detailed-summary-card" aria-label="Detailed Summary">
+        <div class="card-header">
+          <h4><span class="icon">📖</span>Detailed Summary</h4>
+        </div>
+        <div class="ai-card-grid">
+          <div class="ai-subcard">
+            <h5><span class="subcard-icon">💭</span>What it says</h5>
+            <div class="subcard-content"><!-- Write flowing paragraph explaining what the content says, use <strong> for key terms --></div>
+          </div>
+          <div class="ai-subcard">
+            <h5><span class="subcard-icon">🔍</span>How it works</h5>
+            <div class="subcard-content"><!-- Write flowing paragraph explaining how it works or the approach/method --></div>
+          </div>
+          <div class="ai-subcard">
+            <h5><span class="subcard-icon">🎯</span>Why it matters</h5>
+            <div class="subcard-content"><!-- Write flowing paragraph explaining why it matters and the impact/significance --></div>
+          </div>
+          <div class="ai-subcard">
+            <h5><span class="subcard-icon">⚠️</span>Considerations</h5>
+            <div class="subcard-content"><!-- Write flowing paragraph on considerations, limitations, or caveats if relevant --></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    Guidelines:
+    - Use <strong> tags for emphasis on key terms
+    - Include relevant emojis but don't overdo it
+    - Make each bullet actionable and specific
+    - Avoid generic corporate language
+    - Focus on unique insights from the content
     `;
 
     const takeawaysPrompt = `
-    Provide only:
-    ✅ Your takeaways
-    - 3–5 bullets; start with strong verbs; ≤14 words; article-derived; no extras.
+    Create an engaging takeaways section:
+
+    <section class="ai-card takeaways-card" aria-label="Your takeaways">
+      <div class="card-header">
+        <h4><span class="icon">🎯</span>Key Takeaways</h4>
+      </div>
+      <ul class="takeaways-list">
+        <!-- 4-6 actionable, specific bullets with strategic use of <strong> emphasis -->
+        <!-- Example: <li>💡 <strong>Action item:</strong> specific thing you can do</li> -->
+        <!-- Focus on practical insights, not generic observations -->
+      </ul>
+    </section>
+
+    Guidelines:
+    - Start each bullet with a relevant emoji
+    - Use <strong> tags for key actions or concepts
+    - Make each takeaway actionable and specific
+    - Avoid generic advice - focus on unique insights from the content
+    `;
+
+    const questionsPrompt = `
+    Generate exactly 3 valuable, simple questions that readers would naturally want to ask about this content. Return them as a simple JSON array of strings.
+
+    Format: ["Question 1?", "Question 2?", "Question 3?"]
+
+    Guidelines for questions:
+    - Keep each question under 10 words when possible
+    - Make them conversational and natural
+    - Focus on practical applications, clarifications, or deeper insights
+    - Avoid yes/no questions - prefer "how", "what", "when", "why"
+    - Make them specific to the content, not generic
+    - Examples of good questions:
+      * "How do I implement this in practice?"
+      * "What are the common pitfalls?"
+      * "When should I use this approach?"
+      * "Why is this better than alternatives?"
+      * "What tools are recommended?"
+      * "How long does this typically take?"
+
+    Return ONLY the JSON array, no other text or formatting.
+    `;
+
+    const customQuestionPrompt = `
+    Answer this specific question about the content: "${question}"
+
+    Provide a helpful, detailed response using the provided content. Format your response as clean HTML with proper structure:
+
+    <div class="custom-answer">
+      <p>Your comprehensive answer here, using the content to provide specific insights...</p>
+      <!-- Use additional paragraphs, lists, or emphasis as needed -->
+    </div>
+
+    Guidelines:
+    - Answer directly and comprehensively
+    - Use specific examples from the content when possible
+    - Be engaging and practical
+    - Use <strong> tags for emphasis on key points
+    - Include actionable insights when relevant
     `;
 
     const prompts = {
       overview: `${overviewPrompt}\n\n${truncatedContent}`,
-      takeaways: `${takeawaysPrompt}\n\n${truncatedContent}`
+      takeaways: `${takeawaysPrompt}\n\n${truncatedContent}`,
+      questions: `${questionsPrompt}\n\n${truncatedContent}`,
+      custom_question: `${customQuestionPrompt}\n\nContent:\n${truncatedContent}`
     };
 
     const completion = await openai.chat.completions.create({
@@ -92,7 +225,7 @@ export async function POST(request: NextRequest) {
         { role: 'system', content: systemByType },
         { role: 'user', content: prompts[type as keyof typeof prompts] }
       ],
-      max_tokens: type === 'overview' ? 600 : 250,
+      max_tokens: type === 'overview' ? 600 : type === 'takeaways' ? 250 : type === 'custom_question' ? 400 : 150,
       temperature: 0.3,
     });
 
@@ -106,8 +239,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Log usage for monitoring (optional)
-    console.log(`AI request: ${type} for post ${slug || 'unknown'} - tokens: ${completion.usage?.total_tokens}`);
+    // Log usage for monitoring in development only
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`AI request: ${type} for post ${slug || 'unknown'} - tokens: ${completion.usage?.total_tokens}`);
+    }
 
     return NextResponse.json({
       success: true,
