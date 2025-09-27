@@ -33,23 +33,29 @@ if (!WP_GRAPHQL_URL) {
 }
 
 async function graphqlFetch(query: string, variables: Record<string, any> = {}) {
-  const response = await fetch(WP_GRAPHQL_URL!, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
-    next: { revalidate: 300 }, // 5 minutes ISR
-  });
+  try {
+    const response = await fetch(WP_GRAPHQL_URL!, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        variables,
+      }),
+      next: { revalidate: 300 }, // 5 minutes ISR
+    });
 
-  if (!response.ok) {
-    throw new Error(`GraphQL request failed: ${response.status}`);
+    if (!response.ok) {
+      console.error(`GraphQL request failed: ${response.status} ${response.statusText}`);
+      throw new Error(`GraphQL request failed: ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Network error in graphqlFetch:', error);
+    throw error;
   }
-
-  return response.json();
 }
 
 export async function fetchPosts(first: number = 10): Promise<PostNode[]> {
@@ -114,4 +120,16 @@ export function formatDate(dateString: string): string {
     month: 'long',
     day: 'numeric',
   });
+}
+
+export function cleanWordPressContent(content: string): string {
+  if (!content) return content;
+
+  // Cache the result to ensure consistency between server and client
+  // This prevents regex execution differences
+  const cacheKey = content.length + content.slice(0, 100); // Simple cache key
+
+  // For now, return content as-is to avoid hydration issues
+  // TODO: Implement proper client-side cleaning if needed
+  return content;
 }

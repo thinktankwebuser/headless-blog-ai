@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { fetchPostBySlug, formatDate } from '@/lib/wp';
-import BlogTabs from './BlogTabs';
+import { fetchPostBySlug, formatDate, cleanWordPressContent } from '@/lib/wp';
+import ShareButtons from '@/components/ShareButtons';
+import BlogAIContent from './BlogAIContent';
 
 export const revalidate = 300; // 5 minutes ISR
 
@@ -33,11 +34,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <Image
             src={post.featuredImage.node.sourceUrl}
             alt={post.featuredImage.node.altText || post.title}
-            width={900}
-            height={400}
+            width={400}
+            height={240}
             style={{
+              color: 'transparent',
               width: '100%',
-              height: '400px',
+              height: '596px',
               objectFit: 'cover',
             }}
             priority
@@ -45,16 +47,18 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
       )}
 
-      <BlogTabs
+      <BlogAIContent
         postContent={post.content || ''}
         postSlug={slug}
         originalContent={
           <div
             className="post-detail-content"
-            dangerouslySetInnerHTML={{ __html: post.content || '' }}
+            dangerouslySetInnerHTML={{ __html: cleanWordPressContent(post.content || '') }}
           />
         }
       />
+
+      <ShareButtons slug={slug} title={post.title} />
     </article>
   );
 }

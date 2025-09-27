@@ -3,6 +3,7 @@ const nextConfig = {
   typedRoutes: true,
   images: {
     formats: ['image/webp'],
+    qualities: [75, 100],
     remotePatterns: [
       {
         protocol: 'https',
@@ -15,6 +16,18 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: '**.wp.com',
+      },
+      // Allow images from any WordPress site
+      {
+        protocol: 'https',
+        hostname: '**',
+        pathname: '/wp-content/uploads/**',
+      },
+      // Additional pattern for common WordPress media paths
+      {
+        protocol: 'https',
+        hostname: '**',
+        pathname: '/media/**',
       },
     ],
   },

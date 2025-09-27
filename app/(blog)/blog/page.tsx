@@ -66,8 +66,25 @@ export default async function BlogPage() {
 
               <div className="post-card-footer">
                 <Link href={`/blog/${post.slug}`} className="post-card-link">
-                  Read More →
+                  Read More
                 </Link>
+                <div className="post-card-share">
+                  <span className="share-label">Share this:</span>
+                  <div className="share-icons">
+                    <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(`https://localhost:3000/blog/${post.slug}`)}&text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener noreferrer" className="share-icon twitter" aria-label="Share on X">
+                      𝕏
+                    </a>
+                    <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://localhost:3000/blog/${post.slug}`)}`} target="_blank" rel="noopener noreferrer" className="share-icon facebook" aria-label="Share on Facebook">
+                      f
+                    </a>
+                    <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://localhost:3000/blog/${post.slug}`)}`} target="_blank" rel="noopener noreferrer" className="share-icon linkedin" aria-label="Share on LinkedIn">
+                      in
+                    </a>
+                    <a href={`mailto:?subject=${encodeURIComponent(post.title)}&body=${encodeURIComponent(`Check out this article: https://localhost:3000/blog/${post.slug}`)}`} className="share-icon email" aria-label="Share via Email">
+                      @
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </article>
