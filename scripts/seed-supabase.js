@@ -6,7 +6,7 @@ async function seedSupabase() {
     console.log('🌱 Starting Supabase seeding...');
     console.log(`📄 Found ${portfolioSections.length} portfolio sections to seed`);
 
-    const response = await fetch('http://localhost:3001/api/rag', {
+    const response = await fetch('http://localhost:3000/api/rag', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ async function seedSupabase() {
 // Check if data already exists first
 async function checkExistingData() {
   try {
-    const response = await fetch('http://localhost:3001/api/rag', {
+    const response = await fetch('http://localhost:3000/api/rag', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

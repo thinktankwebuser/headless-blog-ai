@@ -33,9 +33,18 @@ export const siteConfig = {
   },
   chat: {
     portfolioQuestions: [
-      "What are your top skills?",
-      "Tell me about your experience",
-      "What projects have you built?"
+      "Who is Austin and what does he do?",
+      "What are Austin's main areas of expertise?",
+      "Tell me about Austin's background and experience",
+      "What kind of work has Austin done in payments and fintech?",
+      "What are some of Austin's major accomplishments?",
+      "Tell me about Austin's commercial impact and business results",
+      "What transformation programs has Austin led?",
+      "How was $100M+ transformation value delivered to central banks?",
+      "What were the results of the $40M+ APAC infrastructure opportunities?",
+      "How does the 'Thinking in CAPITAL' methodology work?",
+      "What's Austin's approach to scaling payment solutions globally?",
+      "Tell me about Austin's program leadership capabilities"
     ],
     timeouts: {
       focus: 100, // ms - timeout for focusing input elements

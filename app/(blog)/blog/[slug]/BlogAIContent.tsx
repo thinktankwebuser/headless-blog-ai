@@ -221,6 +221,18 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
     // Remove any standalone html, HTML, or other language identifiers at the start
     cleaned = cleaned.replace(/^(html|HTML|jsx|JSX|javascript|js)\s*\n?/i, '');
 
+    // Remove broken/incomplete HTML tags at the end (like "</", "</" etc.)
+    cleaned = cleaned.replace(/<\/?[^>]*$/g, '');
+
+    // Remove any trailing incomplete tags or fragments
+    cleaned = cleaned.replace(/\s*<\s*$/, '');
+
+    // Check if content appears to be truncated/incomplete - if so, return empty to prevent display
+    if (cleaned.includes('operational') && !cleaned.includes('</div>') && cleaned.length < 500) {
+      console.log('Detected truncated content, returning empty:', cleaned.substring(0, 100));
+      return '';
+    }
+
     return cleaned.trim();
   }, []);
 

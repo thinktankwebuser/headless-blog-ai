@@ -5,114 +5,65 @@ export interface PortfolioSection {
 }
 
 export const portfolioSections: PortfolioSection[] = [
+  // Executive Overview
   {
-    path: "about.md",
-    heading: "About Me",
-    content: "I'm Austin Puthur, a passionate full-stack developer with 5+ years of experience building scalable web applications. I specialize in React, Node.js, and cloud technologies, with a strong focus on creating user-centric solutions that solve real business problems. I enjoy mentoring junior developers and contributing to open source projects."
+    path: "overview/executive-summary.md",
+    heading: "Strategy & Transformation Leadership",
+    content: "Strategy & Transformation leader with 15+ years of global experience in payments, product management, consulting, and solution selling, delivering $100M+ in transformations for central banks, multinational financial institutions, and retailers.\n\nDeep expertise across real-time payments, cross-border infrastructure, merchant ecosystems, and central payments infrastructure, with proven ability to advise C-suite leaders on payments strategy, operating models, and digital transformation roadmaps.\n\nCore competencies include leading $40M+ central payments infrastructure opportunities across APAC, generating $80M+ pipeline growth, achieving 12% ARR growth acceleration, and delivering $50M+ transformation programs while maintaining 95% client satisfaction across complex international projects.\n\nEducational background includes MBA in Strategy from AGSM @ UNSW Business School, Entrepreneurship Studies from MIT, and B.Tech in Information Technology, providing strong foundation in both strategic thinking and technical implementation."
+  },
+  {
+    path: "overview/thinking-in-capital.md",
+    heading: "Thinking in CAPITAL Framework",
+    content: "The 'Thinking in CAPITAL' philosophy represents a comprehensive approach to payment strategy and digital transformation that treats every transaction, relationship, and strategic decision as capital that must be optimized, preserved, and strategically deployed for maximum value creation.\n\nThis framework has guided over $100M in successful transformation programs across central banks and financial institutions, emphasizing that true capital extends beyond financial resources to include intellectual capital, relationship capital, operational capital, and strategic capital.\n\nThe methodology combines strategic foresight with tactical execution, ensuring that every investment in payments infrastructure, technology platforms, and organizational capabilities generates compounding returns while building sustainable competitive advantages that persist long after initial implementation.\n\nApplied across 15+ years of international experience spanning APAC, Europe, and Latin America, this approach has consistently delivered measurable results including 15% YoY revenue growth, $80M+ pipeline development, and 95%+ client satisfaction scores on complex transformation initiatives."
   },
 
-  // Technical Skills
+  // Core Services
   {
-    path: "skills.md#frontend",
-    heading: "Frontend Technologies",
-    content: "Expert in React (5+ years) with extensive experience in Next.js, TypeScript, and modern CSS frameworks. Built 15+ single-page applications with performance optimization techniques including code splitting, lazy loading, and bundle size reduction achieving 60% faster load times. Proficient in responsive design, accessibility standards, and cross-browser compatibility."
+    path: "services/payments-strategy-transformation.md",
+    heading: "Payments Strategy & Digital Transformation",
+    content: "Leading global payment transformation initiatives with proven expertise across central banks, multinational financial institutions, and emerging fintechs. With 15+ years of international experience spanning APAC, Europe, and Latin America, this practice has delivered over $100M in measurable transformation value through strategic roadmaps and digital innovation programs.\n\nReal-Time Payments Leadership: Architecting next-generation instant payment systems that redefine how money moves in the digital economy. From designing FedNow-style implementations to building cross-border settlement networks, the practice has successfully scaled regional solutions into global platforms serving 25+ major banks. Recent achievements include delivering omni-channel payments transformation for a Big 4 Australian Bank processing over $20B in annual volume, while reducing processing times by 95% and cutting operational costs by 40%.\n\nCross-Border Innovation Excellence: Breaking down barriers in international payments through innovative corridor designs and regulatory harmonization strategies. The practice has facilitated multi-billion dollar cross-border payment flows across 20+ countries, working directly with central banks and monetary authorities to establish interoperable payment rails. A landmark achievement includes leading $40M+ in central payments infrastructure opportunities across APAC, generating $80M+ in pipeline growth while establishing new correspondent banking relationships that reduce settlement costs by 60-70%.\n\nCBDC Strategy & Implementation: At the forefront of Central Bank Digital Currency development, providing comprehensive guidance on monetary policy implications, technical architecture, citizen adoption strategies, and cross-border interoperability. The practice combines deep regulatory knowledge with technical expertise to help central banks navigate the complex intersection of digital currency technology, financial sovereignty, and international monetary cooperation.\n\nInfrastructure Modernization Programs: Building resilient, scalable payment infrastructures that support exponential growth while maintaining security, compliance, and operational excellence. Recent modernization efforts have enabled 300-500% transaction volume increases with 99.9% uptime while achieving 25% reduction in time-to-market for new payment products and services."
   },
   {
-    path: "skills.md#backend",
-    heading: "Backend & Cloud Technologies",
-    content: "Proficient in Node.js, Express.js, and RESTful API development with 4+ years experience. Strong expertise in AWS services including EC2, Lambda, RDS, S3, and CloudFormation. Experience with Docker containerization, CI/CD pipelines using GitHub Actions, and microservices architecture. Database experience includes PostgreSQL, MongoDB, and Redis."
+    path: "services/commercial-impact-growth.md",
+    heading: "Commercial Impact & Business Growth",
+    content: "Driving exceptional commercial results through strategic initiatives that deliver measurable value, sustainable competitive advantage, and transformational business growth. This practice has a proven track record of generating over $100M in measurable transformation value while consistently exceeding financial targets and business objectives across diverse market conditions and competitive environments.\n\n$100M+ Transformation Value Creation: Leading comprehensive transformation programs that generate substantial financial returns through revenue growth, cost optimization, operational excellence, and market expansion. The practice has directly contributed to over $100M in measurable business value through strategic initiatives including new product launches, market expansion efforts, digital transformation programs, and operational efficiency improvements that consistently exceed projected returns by 15-25% while establishing sustainable competitive advantages.\n\nRevenue Growth Acceleration & Market Expansion: Implementing sophisticated revenue growth strategies that expand market share, create new income streams, and establish dominant market positions. The practice has achieved remarkable success including 15% YoY regional revenue growth in Growth Markets while opening $200M+ in new market opportunities. A notable achievement includes generating double-digit pipeline growth ($80M+) in APAC markets through strategic market analysis, competitive positioning, and targeted go-to-market execution.\n\nARR Optimization & SaaS Growth: Developing and executing Annual Recurring Revenue optimization programs that enhance customer lifetime value, reduce churn, and drive sustainable subscription-based growth. The practice has achieved exceptional results including $5M+ ARR uplift across key enterprise clients through improved customer retention, expanded product adoption, and premium service offerings. Recent SaaS optimization initiatives have increased recurring revenue by 40-80% while improving customer satisfaction scores and establishing predictable revenue streams.\n\nMulti-Million Dollar Deal Leadership: Securing high-value contracts and strategic partnerships through sophisticated deal structuring, stakeholder management, and competitive positioning. The practice has personally led and secured deals worth $50M+ in total contract value including complex multi-party agreements, international partnerships, and transformational technology implementations. Recent deal successes include proposals and business cases that accelerated Payments Solution sales ARR growth by 12% YoY while establishing long-term strategic partnerships with key clients."
   },
   {
-    path: "skills.md#languages",
-    heading: "Programming Languages",
-    content: "Primary languages: JavaScript/TypeScript (5+ years), Python (3+ years), HTML/CSS (6+ years). Familiar with: PHP, Go, SQL, GraphQL. Strong understanding of functional programming concepts, async programming patterns, and object-oriented design principles."
-  },
-
-  // Work Experience
-  {
-    path: "experience.md#senior-2022",
-    heading: "Senior Full-Stack Engineer (2022-2024)",
-    content: "Led development of microservices architecture serving 2M+ users daily. Implemented AWS security controls including IAM least-privilege policies, CloudTrail monitoring across 12 accounts, and GuardDuty integration with automated incident response. Reduced infrastructure costs by 40% through resource optimization and S3 lifecycle policies. Mentored 3 junior developers and conducted technical interviews."
+    path: "services/product-solution-strategy.md",
+    heading: "Product & Solution Strategy",
+    content: "Transforming innovative payment concepts into market-leading products that drive sustainable competitive advantage and measurable business growth. This practice combines deep technical expertise with strategic business acumen to build SaaS platforms, enterprise APIs, and consumer-facing solutions that collectively process billions in transaction volume while generating substantial ARR growth.\n\nGlobal Product Roadmap Excellence: Orchestrating complex, multi-year product strategies that align technological capabilities with market opportunities across diverse geographic regions and regulatory environments. The practice has led global product strategy for real-time and eCommerce payments portfolios spanning Acceptance, Issuing, Acquiring, Fraud Detection, and RTP capabilities. Recent successes include owning global product roadmaps that achieved 20% CAGR in SaaS adoption over 4 years while expanding into 15+ new markets and onboarding 100+ financial institutions.\n\nSaaS Platform Development & Scaling: Building and scaling enterprise-grade Software-as-a-Service platforms that serve thousands of financial institutions globally while maintaining exceptional performance and reliability standards. The practice has successfully scaled regional payment solutions into global platforms with 25+ major banks onboarded, processing millions of daily transactions with sub-100ms response times. A key achievement includes partnering with engineering teams to optimize SaaS go-live cycles, cutting release cycles by 20% while improving solution quality and customer satisfaction scores.\n\nAPI Strategy & Monetization: Designing developer-first API ecosystems that drive platform adoption, create new revenue streams, and establish competitive moats in the payments industry. The practice has architected comprehensive API strategies that balance ease of integration with robust security, comprehensive analytics, and scalable performance. Recent API initiatives have generated $5M+ ARR uplift across key enterprise clients while enabling 1000+ developer integrations and supporting 10M+ monthly API calls with 99.9% availability.\n\nGo-to-Market Strategy & Execution: Developing sophisticated GTM strategies that accelerate product adoption, expand market penetration, and drive measurable commercial results. The practice has designed and executed GTM strategies that achieved 15% YoY regional revenue growth while reducing customer acquisition costs by 25-50%. A landmark success includes developing a 3-year GTM strategy that generated double-digit pipeline growth ($80M+) in APAC markets while accelerating Payments Solution sales ARR growth by 12% YoY."
   },
   {
-    path: "experience.md#mid-2020",
-    heading: "Mid-Level Developer (2020-2022)",
-    content: "Built React-based customer portals with real-time data visualization using WebSocket connections. Developed GraphQL APIs with 99.9% uptime handling 50K+ requests per hour. Implemented comprehensive testing strategies including unit tests (Jest), integration tests, and E2E testing (Cypress). Collaborated with product and design teams in agile development environment."
+    path: "services/consulting-advisory.md",
+    heading: "Consulting & C-Suite Advisory",
+    content: "Delivering transformational insights and strategic guidance to executive leadership teams navigating the complex landscape of digital finance, payments innovation, and organizational transformation. This advisory practice combines 15+ years of hands-on implementation experience with deep strategic thinking to drive measurable organizational change and sustainable competitive advantage.\n\nExecutive Strategy Development: Facilitating high-impact strategic planning sessions and discovery workshops for C-suite executives, board members, and senior leadership teams. The practice has shaped Universal Payments strategies for leaders at major banks and fintechs across APAC, helping define 3-5 year transformation roadmaps that align technology investments with business objectives. Recent workshop facilitation has resulted in executive sign-off on $20M+ transformation programs while achieving 95% stakeholder alignment and clear strategic consensus.\n\nBusiness Case Excellence & Investment Justification: Crafting compelling, data-driven business cases that secure executive buy-in and board approval for large-scale transformation initiatives and strategic investments. The practice has developed business cases for Banking Payments Hubs, Treasury platform modernization, and digital transformation programs with 90%+ approval rates. A notable success includes developing the business case for a major bank's central payments infrastructure that secured executive approval for a $20M+ program while demonstrating clear ROI and risk mitigation strategies.\n\nLarge-Scale Transformation Leadership: Orchestrating enterprise-wide transformation programs that touch every aspect of an organization's payment capabilities while managing complex stakeholder relationships and technical dependencies. The practice has delivered $50M+ in transformation programs including central bank modernizations and Tier-1 bank digital transformations. Recent transformation leadership includes managing multi-country projects with 50+ team members while achieving 95% client satisfaction and on-time delivery within budget constraints.\n\nOperational Excellence & Cost Optimization: Identifying and implementing sophisticated cost reduction strategies that maintain or improve service quality while significantly reducing operational expenses and infrastructure costs. The practice has designed Treasury platform rationalization blueprints that cut system costs by 20-30% while improving operational efficiency and regulatory compliance."
   },
   {
-    path: "experience.md#junior-2019",
-    heading: "Junior Developer (2019-2020)",
-    content: "Started career building responsive web applications using React and Node.js. Contributed to e-commerce platform development with features including shopping cart, payment integration (Stripe), and inventory management. Gained experience with version control (Git), code reviews, and deployment processes."
+    path: "services/program-leadership-execution.md",
+    heading: "Program Leadership & Execution",
+    content: "Orchestrating complex, multi-stakeholder programs that deliver transformational business outcomes while maintaining exceptional standards of execution, stakeholder satisfaction, and operational excellence. This practice specializes in managing large-scale initiatives that span multiple countries, regulatory environments, and organizational boundaries while consistently achieving on-time, on-budget delivery with measurable business impact.\n\nComplex International Program Management: Leading sophisticated transformation programs across multiple countries and regulatory jurisdictions while managing diverse stakeholder groups, cultural considerations, and complex technical dependencies. The practice has successfully delivered $50M+ transformation programs including central bank modernizations, multi-country payments implementations, and enterprise digital transformations. Recent program achievements include managing international projects with 50+ team members across 10+ countries while maintaining 95% client satisfaction and 100% on-time delivery within budget constraints.\n\nStakeholder Management & Alignment: Building and maintaining strong relationships with diverse stakeholder groups including C-suite executives, board members, regulatory authorities, technology partners, and implementation teams. The practice has achieved exceptional results in stakeholder management including 95%+ stakeholder alignment on complex transformation initiatives and successful navigation of challenging political and organizational dynamics. A notable achievement includes facilitating executive consensus across multiple business units and countries for a $20M+ transformation program while maintaining project momentum and stakeholder engagement.\n\nRisk Management & Mitigation: Implementing comprehensive risk management frameworks that identify, assess, and mitigate potential program risks while maintaining project momentum and delivery timelines. The practice has developed sophisticated risk management methodologies that have prevented major program failures and delivered successful outcomes even in challenging environments. Recent risk management successes include proactively identifying and mitigating technical, regulatory, and organizational risks that could have derailed multi-million dollar transformation programs.\n\nOperational Excellence & Continuous Improvement: Establishing operational frameworks that drive consistent program delivery excellence while building organizational capabilities for sustained performance improvement. The practice has implemented program management methodologies that improved delivery efficiency by 25% while reducing costs and enhancing quality outcomes."
   },
 
-  // Specific Technology Experience
+  // Key Principles & Methodologies
   {
-    path: "aws.md#security",
-    heading: "AWS Security & Compliance",
-    content: "Extensive experience implementing AWS security best practices. Led rollout of IAM policies with least-privilege access across organization. Set up CloudTrail for comprehensive audit logging and monitoring. Configured GuardDuty for threat detection with automated Slack notifications. Implemented VPC security groups, NACLs, and encryption at rest and in transit. Experience with AWS Config for compliance monitoring."
+    path: "principles/clarity-in-vision.md",
+    heading: "Clarity in Vision - Strategic Transparency & Long-Term Foresight",
+    content: "Establishing crystal-clear strategic direction through transparent planning frameworks and comprehensive long-term market foresight based on deep industry experience. Drawing from 15+ years of global payments experience across APAC, Europe, and Latin America, this principle emphasizes creating compelling visions that resonate with stakeholders across all organizational levels, from board members to front-line implementation teams. The clarity framework combines real-world market intelligence, emerging technology trends, competitive analysis, and regulatory insights to create actionable roadmaps that guide decision-making for 3-5 year horizons. This clarity enables organizations to navigate uncertainty with confidence, allocate resources effectively, maintain strategic focus amid rapidly changing market conditions, and achieve measurable transformation results like the $100M+ in delivered value across central banks and multinational financial institutions."
   },
   {
-    path: "aws.md#architecture",
-    heading: "AWS Architecture & Infrastructure",
-    content: "Designed and implemented scalable AWS architectures using EC2, ECS, Lambda, and RDS. Built serverless applications with Lambda functions, API Gateway, and DynamoDB. Experience with CloudFormation and CDK for infrastructure as code. Implemented auto-scaling groups, load balancers, and multi-AZ deployments for high availability. Cost optimization through Reserved Instances and Spot Instances."
+    path: "principles/authority-in-decision-making.md",
+    heading: "Authority in Decision-Making - Informed Leadership & Decisive Action",
+    content: "Exercising informed leadership through data-driven decision-making processes that combine analytical rigor with strategic intuition developed through extensive international experience. This principle leverages deep subject matter expertise across payments strategy, digital transformation, and organizational change to make confident decisions in complex, high-stakes environments. The authority framework includes comprehensive stakeholder consultation, risk assessment, and scenario planning while maintaining the decisiveness required for effective program leadership. Recent applications include leading $40M+ central payments infrastructure decisions across APAC, securing executive approval for $20M+ transformation programs, and guiding strategic technology investments that generated $80M+ in pipeline growth. This authority enables organizations to move quickly on strategic opportunities while maintaining confidence in decision quality and stakeholder alignment."
   },
   {
-    path: "react.md#performance",
-    heading: "React Performance Optimization",
-    content: "Expert in React performance optimization techniques including React.memo, useMemo, useCallback for preventing unnecessary re-renders. Implemented code splitting with React.lazy and Suspense reducing initial bundle size by 60%. Used React Profiler to identify performance bottlenecks. Experience with virtual scrolling for large datasets and Web Workers for heavy computations."
+    path: "principles/precision-in-execution.md",
+    heading: "Precision in Execution - Methodical Implementation & Quality Excellence",
+    content: "Delivering exceptional execution quality through methodical implementation frameworks that ensure consistent, repeatable results across complex transformation initiatives. This principle emphasizes systematic planning, rigorous project management, and continuous quality monitoring to achieve measurable outcomes like 95% client satisfaction, on-time delivery, and budget adherence. The precision framework includes detailed work breakdown structures, milestone tracking, risk monitoring, and stakeholder communication protocols that have been refined through managing $50M+ in transformation programs. Recent precision execution achievements include delivering omni-channel payments transformation for a Big 4 Australian Bank processing $20B+ annually while reducing processing times by 95% and cutting operational costs by 40%. This precision enables organizations to achieve ambitious transformation goals while maintaining operational stability and stakeholder confidence."
   },
   {
-    path: "react.md#ecosystem",
-    heading: "React Ecosystem & State Management",
-    content: "Extensive experience with React ecosystem including Redux, Context API, and custom hooks for state management. Built complex forms with React Hook Form and validation schemas. Implemented routing with React Router including protected routes and dynamic imports. Experience with testing React components using React Testing Library and Jest."
-  },
-
-  // Projects
-  {
-    path: "projects.md#blog-platform",
-    heading: "Headless Blog Platform (Current)",
-    content: "Built this portfolio site using Next.js 15 with App Router, WordPress GraphQL API integration, and OpenAI-powered content generation. Implemented security measures including XSS protection with DOMPurify and proper image domain validation. Features include responsive design, SEO optimization, and AI-powered blog summaries. Deployed on Vercel with automatic builds and environment management."
-  },
-  {
-    path: "projects.md#ecommerce",
-    heading: "E-commerce Platform",
-    content: "Developed full-stack e-commerce solution handling $2M+ annual revenue. Built with React frontend, Node.js/Express backend, and PostgreSQL database. Integrated Stripe payment processing, inventory management system, and admin dashboard. Implemented search functionality with Elasticsearch and real-time notifications with WebSocket connections. Achieved 99.8% uptime with comprehensive error monitoring."
-  },
-  {
-    path: "projects.md#dashboard",
-    heading: "Real-time Analytics Dashboard",
-    content: "Created business intelligence dashboard processing 1M+ data points daily. Built with React, D3.js for custom visualizations, and Node.js backend with Redis caching. Implemented WebSocket connections for real-time updates and CSV/PDF export functionality. Features include customizable widgets, user role management, and mobile-responsive design."
-  },
-  {
-    path: "projects.md#api-platform",
-    heading: "API Platform & Microservices",
-    content: "Designed and built microservices platform serving 50+ internal APIs. Implemented API Gateway with rate limiting, authentication (JWT), and comprehensive logging. Built with Node.js, Docker containers, and Kubernetes orchestration. Features include automatic API documentation, health checks, and circuit breaker patterns for fault tolerance."
-  },
-
-  // Education & Certifications
-  {
-    path: "education.md",
-    heading: "Education",
-    content: "Bachelor of Science in Computer Science from State University (2019). Coursework included algorithms, data structures, software engineering, database design, and computer networks. Graduated cum laude with focus on web technologies and software architecture. Completed senior capstone project building a collaborative code editor."
-  },
-  {
-    path: "certifications.md",
-    heading: "Professional Certifications",
-    content: "AWS Certified Solutions Architect - Associate (2023), AWS Certified Developer - Associate (2022). Google Cloud Professional Cloud Architect (2023). MongoDB Certified Developer (2021). Continuously updating skills through online courses and conferences including Re:Invent, React Conf, and local tech meetups."
-  },
-
-  // Soft Skills & Leadership
-  {
-    path: "leadership.md",
-    heading: "Leadership & Collaboration",
-    content: "Experienced in leading cross-functional teams and mentoring junior developers. Conducted 50+ technical interviews and code reviews. Built onboarding processes reducing new hire ramp-up time by 50%. Strong communication skills with experience presenting technical concepts to non-technical stakeholders. Advocated for code quality standards and best practices across organization."
-  },
-
-  // Contact & Availability
-  {
-    path: "contact.md",
-    heading: "Contact Information",
-    content: "Available for freelance projects, consulting, or full-time opportunities. You can reach me via LinkedIn (linkedin.com/in/austinputhur), email (austin@example.com), or through this website's contact form. Based in San Francisco Bay Area, open to remote work opportunities. Response time typically within 24 hours for project inquiries."
+    path: "principles/strategic-investments.md",
+    heading: "Strategic Investments - Scalable Returns & Proven Value Creation",
+    content: "Channeling organizational resources into high-impact areas that generate scalable, sustainable returns on investment based on proven experience delivering $100M+ in transformation value. The strategic investment framework identifies opportunities that compound over time, creating lasting competitive advantages rather than short-term gains through systematic analysis of market trends, technology capabilities, and competitive positioning. Recent strategic investment successes include achieving $5M+ ARR uplift across key enterprise clients, generating double-digit pipeline growth ($80M+) in APAC markets, and delivering 12% YoY ARR growth acceleration through targeted technology platforms and capability development programs. This strategic focus ensures every dollar invested generates maximum long-term value while building sustainable competitive advantages that continue delivering returns for years after initial implementation."
   }
 ];
 
@@ -132,7 +83,7 @@ export function validatePortfolioSections(): string[] {
     if (!section.content || section.content.length < 50) {
       errors.push(`Section ${index} (${section.path}): Content too short`);
     }
-    if (section.content && section.content.length > 2000) {
+    if (section.content && section.content.length > 3000) {
       errors.push(`Section ${index} (${section.path}): Content too long (${section.content.length} chars)`);
     }
   });

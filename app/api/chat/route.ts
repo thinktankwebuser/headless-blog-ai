@@ -12,15 +12,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { supabaseAdmin, PortfolioMatch } from '@/lib/supabase-admin';
-import { findLocalAnswer } from '@/lib/local-qa';
 
 export const runtime = 'nodejs'; // Ensure Node.js runtime for better compatibility
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
 const MODEL_EMBED = 'text-embedding-3-small'; // 1536 dimensions
-const SIM_THRESHOLD = 0.3; // Similarity threshold for relevant matches (lowered for better coverage)
+const SIM_THRESHOLD = 0.1; // Similarity threshold for relevant matches (lowered for better coverage)
 const MATCH_COUNT = 5; // Maximum number of matches to retrieve
-const RAG_MODE = process.env.RAG_MODE || 'local'; // 'supabase' or 'local'
 
 // Simple rate limiting (in-memory, resets on restart)
 const rateLimit = new Map<string, number>();
@@ -202,7 +200,7 @@ export async function POST(request: NextRequest) {
 
     // Enhanced guardrails - check for denied keywords
     const deniedKeywords = [
-      'salary', 'wage', 'money', 'pay', 'income', 'financial', 'finance',
+      'salary', 'wage', 'income', // Personal compensation (but allow 'pay' for payments)
       'personal', 'private', 'confidential', 'secret',
       'medical', 'health', 'doctor',
       'political', 'politics', 'vote',
@@ -223,40 +221,13 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    let result;
-
-    if (RAG_MODE === 'supabase') {
-      // Use Supabase vector search
-      const matches = await searchPortfolio(trimmedQuestion);
-      result = await generateAnswer(trimmedQuestion, matches);
-    } else {
-      // Use local keyword matching
-      const localResult = findLocalAnswer(trimmedQuestion);
-
-      if (localResult.answer) {
-        result = {
-          answer: localResult.answer,
-          refusal: false,
-          citations: [{
-            path: `portfolio-${localResult.category || 'data'}.md`,
-            heading: localResult.category ? localResult.category.charAt(0).toUpperCase() + localResult.category.slice(1) : null,
-            similarity: 1.0
-          }]
-        };
-      } else {
-        result = {
-          answer: null,
-          refusal: true,
-          message: "I can only answer questions about Austin's portfolio (bio, CV, skills, experience, projects).",
-          citations: []
-        };
-      }
-    }
+    // Use Supabase vector search
+    const matches = await searchPortfolio(trimmedQuestion);
+    const result = await generateAnswer(trimmedQuestion, matches);
 
     // Log for monitoring (development only)
     if (process.env.NODE_ENV === 'development') {
-      const mode = RAG_MODE === 'supabase' ? 'Supabase' : 'Local';
-      console.log(`${mode} Chat: "${trimmedQuestion.substring(0, 50)}..." -> Answer: ${result.answer ? 'Generated' : 'Refused'}`);
+      console.log(`Supabase Chat: "${trimmedQuestion.substring(0, 50)}..." -> Answer: ${result.answer ? 'Generated' : 'Refused'}`);
     }
 
     return NextResponse.json(result);
