@@ -313,7 +313,7 @@ export function useContextDetection(): ContextConfig {
       contextInsights: pageInsights,
       dynamicQuestions: [
         'What makes Austin uniquely qualified for fintech roles?',
-        'How do westay current with emerging technologies?',
+        'How do we stay current with emerging technologies?',
         'What\'s Austin\'s leadership philosophy?'
       ],
       relatedTopics: getRelatedTopics(defaultContext)
