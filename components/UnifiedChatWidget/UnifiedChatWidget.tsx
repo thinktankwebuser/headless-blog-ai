@@ -275,7 +275,7 @@ function UnifiedChatWidget() {
 
     if (activeTab === 'portfolio') {
       allQuestions = [
-        'What\'s your experience with Next.js?',
+        'What\'s your experience with finance?',
         'Tell me about your fintech background',
         'Show me a complex integration you\'ve led'
       ];
@@ -289,9 +289,9 @@ function UnifiedChatWidget() {
         ];
       } else {
         allQuestions = [
-          'What are Austin\'s key insights on AI?',
+          'What key insights on AI do we have?',
           'Find posts about payment optimization',
-          'How does Austin approach fintech innovation?'
+          'How do we approach fintech innovation?'
         ];
       }
     }
@@ -343,11 +343,8 @@ function UnifiedChatWidget() {
           <div className="chat-header-content">
             <h3 id="chat-title">
               <span className="chat-logo" aria-hidden="true">{contextConfig.icon}</span>
-              Austin's AI Assistant
+              Thinking in CAPITAL's AI Assistant
             </h3>
-            <div id="chat-description" className="context-indicator">
-              📍 {activeTab === 'portfolio' ? 'Portfolio Mode' : `Blog Mode - ${activeChip || 'All Posts'}`}
-            </div>
           </div>
           <button
             onClick={handleClose}
@@ -436,8 +433,8 @@ function UnifiedChatWidget() {
               <p>{activeTab === 'portfolio'
                 ? 'Ask about Austin\'s background, skills, and experience'
                 : activeChip === 'This post'
-                  ? 'Get insights about this post + Austin\'s expertise'
-                  : 'Search across all of Austin\'s blog insights'
+                  ? 'Get insights about this post + our expertise'
+                  : 'Search across all of our blog insights'
               }</p>
 
               {/* Context Insights - Phase 2 enhancement - COMMENTED OUT FOR SPACE */}
