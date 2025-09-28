@@ -57,7 +57,11 @@ function UnifiedChatWidget() {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Use scrollTop instead of scrollIntoView to prevent layout issues
+    const messagesContainer = messagesEndRef.current?.closest('.chat-messages');
+    if (messagesContainer) {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
   }, [currentMessages.length]);
 
   // Focus input when modal opens
@@ -95,39 +99,11 @@ function UnifiedChatWidget() {
     }
   }, [pathname]);
 
-  // Mobile keyboard handling
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleResize = () => {
-      // Detect mobile keyboard by checking viewport height change
-      const isMobile = window.innerWidth <= 768;
-      if (isMobile) {
-        const viewportHeight = window.innerHeight;
-        const isKeyboardOpen = viewportHeight < window.screen.height * 0.75;
-
-        // Adjust modal positioning when keyboard is open
-        const modal = document.querySelector('.unified-chat-modal') as HTMLElement;
-        if (modal) {
-          if (isKeyboardOpen) {
-            modal.style.alignItems = 'flex-start';
-            modal.style.paddingTop = '10px';
-          } else {
-            modal.style.alignItems = 'flex-end';
-            modal.style.paddingTop = '';
-          }
-        }
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    // Initial check
-    handleResize();
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [isOpen]);
+  // Mobile keyboard handling - disabled to prevent header disappearing bug
+  // useEffect(() => {
+  //   // Commenting out mobile keyboard handling as it was causing header to disappear
+  //   // The CSS already handles mobile layout properly
+  // }, [isOpen]);
 
   const handleSend = useCallback(async () => {
     if (!inputValue.trim() || loading) return;
