@@ -233,7 +233,6 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
 
     // Check if content appears to be truncated/incomplete - if so, return empty to prevent display
     if (cleaned.includes('operational') && !cleaned.includes('</div>') && cleaned.length < 500) {
-      console.log('Detected truncated content, returning empty:', cleaned.substring(0, 100));
       return '';
     }
 

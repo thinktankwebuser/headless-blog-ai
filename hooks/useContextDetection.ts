@@ -114,40 +114,6 @@ function generateSmartSuggestions(context: ChatContext, postSlug?: string): Smar
   return suggestions;
 }
 
-function generateDynamicQuestions(context: ChatContext, pathname: string): string[] {
-  // Generate context-aware questions based on current page
-  const baseQuestions: Record<ChatContext, string[]> = {
-    'portfolio': [
-      'What makes Austin uniquely qualified for fintech roles?',
-      'How does Austin stay current with emerging technologies?',
-      'What\'s Austin\'s leadership philosophy?'
-    ],
-    'blog-post': [
-      'How does this insight apply to real-world scenarios?',
-      'What tools or frameworks support this approach?',
-      'What are common misconceptions about this topic?'
-    ],
-    'blog-search': [
-      'What patterns emerge across Austin\'s content?',
-      'How has Austin\'s thinking evolved over time?',
-      'What are Austin\'s contrarian views in the industry?'
-    ]
-  };
-
-  // Add time-sensitive questions
-  const timeAwareQuestions = [];
-  const hour = new Date().getHours();
-
-  if (hour < 12) {
-    timeAwareQuestions.push('What should I focus on today?');
-  } else if (hour < 17) {
-    timeAwareQuestions.push('How can I apply this to my current project?');
-  } else {
-    timeAwareQuestions.push('What are the key learnings to remember?');
-  }
-
-  return [...baseQuestions[context], ...timeAwareQuestions];
-}
 
 function getRelatedTopics(context: ChatContext, postSlug?: string): string[] {
   // Generate related topics based on context
@@ -163,6 +129,7 @@ function getRelatedTopics(context: ChatContext, postSlug?: string): string[] {
 export function useContextDetection(): ContextConfig {
   const pathname = usePathname();
   const [pageInsights, setPageInsights] = useState<ContextInsight>({});
+  const [dynamicQuestions, setDynamicQuestions] = useState<{[slug: string]: string[]}>({});
 
   // Advanced page content analysis (Phase 2)
   useEffect(() => {
@@ -170,6 +137,12 @@ export function useContextDetection(): ContextConfig {
       if (pathname?.startsWith('/blog/')) {
         try {
           const postSlug = pathname.split('/blog/')[1];
+
+          // Check if we already have questions for this post
+          if (dynamicQuestions[postSlug]) {
+            return;
+          }
+
           const response = await fetch(`/api/blog-content/${postSlug}`);
           if (response.ok) {
             const data = await response.json();
@@ -180,6 +153,45 @@ export function useContextDetection(): ContextConfig {
               relatedContent: [],
               difficulty: data.wordCount > 1500 ? 'advanced' : data.wordCount > 800 ? 'intermediate' : 'beginner'
             });
+
+            // Generate AI questions for this specific post
+            if (data.content) {
+              try {
+                const questionsResponse = await fetch('/api/ai-generate', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    content: data.content,
+                    type: 'questions',
+                    slug: postSlug
+                  }),
+                });
+
+                if (questionsResponse.ok) {
+                  const questionsData = await questionsResponse.json();
+                  if (questionsData.success) {
+                    const cleanedContent = questionsData.content
+                      .replace(/^```json\s*/i, '')
+                      .replace(/\s*```$/, '')
+                      .trim();
+                    const questions = JSON.parse(cleanedContent);
+                    if (Array.isArray(questions) && questions.length > 0) {
+                      // Add 3-second delay before rendering questions to prevent rate limit issues
+                      // Capture the postSlug in closure to prevent stale references
+                      const currentSlug = postSlug;
+                      setTimeout(() => {
+                        setDynamicQuestions(prev => ({
+                          ...prev,
+                          [currentSlug]: questions
+                        }));
+                      }, 3000);
+                    }
+                  }
+                }
+              } catch (questionsError) {
+                console.error('Error generating dynamic questions:', questionsError);
+              }
+            }
           }
         } catch (error) {
           console.error('Error analyzing page content:', error);
@@ -210,7 +222,11 @@ export function useContextDetection(): ContextConfig {
         // Enhanced Phase 2 features
         smartSuggestions: generateSmartSuggestions(context),
         contextInsights: pageInsights,
-        dynamicQuestions: generateDynamicQuestions(context, pathname),
+        dynamicQuestions: [
+          'What makes Austin uniquely qualified for fintech roles?',
+          'How does Austin stay current with emerging technologies?',
+          'What\'s Austin\'s leadership philosophy?'
+        ],
         relatedTopics: getRelatedTopics(context)
       };
     }
@@ -234,7 +250,11 @@ export function useContextDetection(): ContextConfig {
         // Enhanced Phase 2 features
         smartSuggestions: generateSmartSuggestions(context),
         contextInsights: pageInsights,
-        dynamicQuestions: generateDynamicQuestions(context, pathname),
+        dynamicQuestions: [
+          'What patterns emerge across Austin\'s content?',
+          'How has Austin\'s thinking evolved over time?',
+          'What are Austin\'s contrarian views in the industry?'
+        ],
         relatedTopics: getRelatedTopics(context)
       };
     }
@@ -243,6 +263,15 @@ export function useContextDetection(): ContextConfig {
     if (pathname?.startsWith('/blog/')) {
       const postSlug = pathname.split('/blog/')[1];
       const context: ChatContext = 'blog-post';
+
+      // Always include the first 2 default questions, then append AI-generated ones
+      const aiQuestions = dynamicQuestions[postSlug] || [];
+      const questionsForPost = [
+        'Summarize this post in 5 bullets',
+        'What are the key takeaways?',
+        ...aiQuestions
+      ];
+
       return {
         defaultTab: 'blog',
         context,
@@ -254,13 +283,12 @@ export function useContextDetection(): ContextConfig {
         capabilityStatement: 'I summarize and answer questions about this post. I cite sections I used.',
         exampleQuestions: [
           'Summarize this post in 5 bullets',
-          'What are the key takeaways?',
-          'How does this connect to other posts?'
+          'What are the key takeaways?'
         ],
         // Enhanced Phase 2 features
         smartSuggestions: generateSmartSuggestions(context, postSlug),
         contextInsights: pageInsights,
-        dynamicQuestions: generateDynamicQuestions(context, pathname),
+        dynamicQuestions: questionsForPost,
         relatedTopics: getRelatedTopics(context, postSlug)
       };
     }
@@ -283,8 +311,12 @@ export function useContextDetection(): ContextConfig {
       // Enhanced Phase 2 features
       smartSuggestions: generateSmartSuggestions(defaultContext),
       contextInsights: pageInsights,
-      dynamicQuestions: generateDynamicQuestions(defaultContext, pathname),
+      dynamicQuestions: [
+        'What makes Austin uniquely qualified for fintech roles?',
+        'How does Austin stay current with emerging technologies?',
+        'What\'s Austin\'s leadership philosophy?'
+      ],
       relatedTopics: getRelatedTopics(defaultContext)
     };
-  }, [pathname, pageInsights]);
+  }, [pathname, pageInsights, dynamicQuestions]);
 }
