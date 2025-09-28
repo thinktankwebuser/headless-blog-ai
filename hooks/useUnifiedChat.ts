@@ -4,10 +4,16 @@ import { useState, useCallback } from 'react';
 import { UnifiedChatMessage, UnifiedChatResponse, ChatState, SendMessageOptions } from '@/types/chat';
 import { findRelevantSection, createEnhancedCitation, BlogSection } from '@/lib/blog-processor';
 
+// Helper function to determine blog message key
+const getBlogKey = (context: string, postSlug?: string): string => {
+  if (context === 'blog-post' && postSlug) return postSlug;
+  return 'general'; // for blog-search or fallback
+};
+
 export function useUnifiedChat() {
   const [state, setState] = useState<ChatState>({
     portfolioMessages: [],
-    blogMessages: [],
+    blogMessages: {},
     loading: false,
     error: null,
   });
@@ -27,16 +33,29 @@ export function useUnifiedChat() {
       timestamp: new Date(),
     };
 
+    const blogKey = getBlogKey(messageContext, options.postSlug);
+
     // Add user message to appropriate context
-    setState(prev => ({
-      ...prev,
-      [messageContext === 'portfolio' ? 'portfolioMessages' : 'blogMessages']: [
-        ...(messageContext === 'portfolio' ? prev.portfolioMessages : prev.blogMessages),
-        userMessage
-      ],
-      loading: true,
-      error: null,
-    }));
+    setState(prev => {
+      if (messageContext === 'portfolio') {
+        return {
+          ...prev,
+          portfolioMessages: [...prev.portfolioMessages, userMessage],
+          loading: true,
+          error: null,
+        };
+      } else {
+        return {
+          ...prev,
+          blogMessages: {
+            ...prev.blogMessages,
+            [blogKey]: [...(prev.blogMessages[blogKey] || []), userMessage]
+          },
+          loading: true,
+          error: null,
+        };
+      }
+    });
 
     try {
       let response: Response;
@@ -199,14 +218,24 @@ Key expertise areas: Payment systems, AI implementation, API integrations, platf
         };
       }
 
-      setState(prev => ({
-        ...prev,
-        [messageContext === 'portfolio' ? 'portfolioMessages' : 'blogMessages']: [
-          ...(messageContext === 'portfolio' ? prev.portfolioMessages : prev.blogMessages),
-          assistantMessage
-        ],
-        loading: false,
-      }));
+      setState(prev => {
+        if (messageContext === 'portfolio') {
+          return {
+            ...prev,
+            portfolioMessages: [...prev.portfolioMessages, assistantMessage],
+            loading: false,
+          };
+        } else {
+          return {
+            ...prev,
+            blogMessages: {
+              ...prev.blogMessages,
+              [blogKey]: [...(prev.blogMessages[blogKey] || []), assistantMessage]
+            },
+            loading: false,
+          };
+        }
+      });
 
     } catch (error) {
       console.error('Unified chat error:', error);
@@ -220,29 +249,75 @@ Key expertise areas: Payment systems, AI implementation, API integrations, platf
         timestamp: new Date(),
       };
 
-      setState(prev => ({
-        ...prev,
-        [messageContext === 'portfolio' ? 'portfolioMessages' : 'blogMessages']: [
-          ...(messageContext === 'portfolio' ? prev.portfolioMessages : prev.blogMessages),
-          errorMessage
-        ],
-        loading: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      }));
+      setState(prev => {
+        if (messageContext === 'portfolio') {
+          return {
+            ...prev,
+            portfolioMessages: [...prev.portfolioMessages, errorMessage],
+            loading: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          };
+        } else {
+          return {
+            ...prev,
+            blogMessages: {
+              ...prev.blogMessages,
+              [blogKey]: [...(prev.blogMessages[blogKey] || []), errorMessage]
+            },
+            loading: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          };
+        }
+      });
     }
   }, [state.loading]);
 
-  const clearMessages = useCallback((context?: 'portfolio' | 'blog') => {
-    setState(prev => ({
-      ...prev,
-      portfolioMessages: context === 'blog' ? prev.portfolioMessages : [],
-      blogMessages: context === 'portfolio' ? prev.blogMessages : [],
-      error: null,
-    }));
+  const clearMessages = useCallback((context?: 'portfolio' | 'blog' | 'all' | string) => {
+    setState(prev => {
+      if (!context) {
+        // Clear all messages
+        return {
+          ...prev,
+          portfolioMessages: [],
+          blogMessages: {},
+          error: null,
+        };
+      } else if (context === 'portfolio') {
+        // Clear only blog messages, keep portfolio
+        return {
+          ...prev,
+          blogMessages: {},
+          error: null,
+        };
+      } else if (context === 'blog') {
+        // Clear only portfolio messages, keep blog
+        return {
+          ...prev,
+          portfolioMessages: [],
+          error: null,
+        };
+      } else {
+        // Clear specific blog post by slug
+        const newBlogMessages = { ...prev.blogMessages };
+        delete newBlogMessages[context];
+        return {
+          ...prev,
+          blogMessages: newBlogMessages,
+          error: null,
+        };
+      }
+    });
   }, []);
 
-  const getMessagesForContext = useCallback((context: 'portfolio' | 'blog'): UnifiedChatMessage[] => {
-    return context === 'portfolio' ? state.portfolioMessages : state.blogMessages;
+  const getMessagesForContext = useCallback((context: 'portfolio' | 'blog', postSlug?: string): UnifiedChatMessage[] => {
+    if (context === 'portfolio') {
+      return state.portfolioMessages;
+    } else {
+      // Use same logic as sendMessage to determine blog key
+      const blogContext = postSlug ? 'blog-post' : 'blog-search';
+      const blogKey = getBlogKey(blogContext, postSlug);
+      return state.blogMessages[blogKey] || [];
+    }
   }, [state.portfolioMessages, state.blogMessages]);
 
   return {

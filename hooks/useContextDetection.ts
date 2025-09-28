@@ -215,7 +215,7 @@ export function useContextDetection(): ContextConfig {
         welcomeMessage: 'Ask about Austin\'s background, skills, and experience',
         capabilityStatement: 'I answer using my résumé, projects, and case studies. I don\'t give personal finance or legal advice.',
         exampleQuestions: [
-          'What\'s your experience with Next.js?',
+          'What\'s your experience with finance?',
           'Tell me about your fintech background',
           'Show me a complex integration you\'ve led'
         ],
@@ -224,7 +224,7 @@ export function useContextDetection(): ContextConfig {
         contextInsights: pageInsights,
         dynamicQuestions: [
           'What makes Austin uniquely qualified for fintech roles?',
-          'How does Austin stay current with emerging technologies?',
+          'How do we stay current with emerging technologies?',
           'What\'s Austin\'s leadership philosophy?'
         ],
         relatedTopics: getRelatedTopics(context)
@@ -243,9 +243,9 @@ export function useContextDetection(): ContextConfig {
         welcomeMessage: 'Search across all of Austin\'s blog insights',
         capabilityStatement: 'I search and summarize across all blog posts. I cite the specific posts I reference.',
         exampleQuestions: [
-          'What are Austin\'s key insights on AI?',
+          'What key insights on AI do we have?',
           'Find posts about payment optimization',
-          'How does Austin approach fintech innovation?'
+          'How do we approach fintech innovation?'
         ],
         // Enhanced Phase 2 features
         smartSuggestions: generateSmartSuggestions(context),
@@ -313,7 +313,7 @@ export function useContextDetection(): ContextConfig {
       contextInsights: pageInsights,
       dynamicQuestions: [
         'What makes Austin uniquely qualified for fintech roles?',
-        'How does Austin stay current with emerging technologies?',
+        'How do westay current with emerging technologies?',
         'What\'s Austin\'s leadership philosophy?'
       ],
       relatedTopics: getRelatedTopics(defaultContext)

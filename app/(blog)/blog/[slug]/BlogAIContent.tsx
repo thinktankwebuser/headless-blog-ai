@@ -441,16 +441,6 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
 
   return (
     <div className="blog-content">
-      <button
-        id="blog-qa-btn"
-        className="floating-qa-button"
-        onClick={() => handleButtonClick('chat')}
-        aria-label="Open Blog Q&A with AI"
-      >
-        Q&A
-      </button>
-
-
       {/* Chat Modal for both mobile and desktop */}
       {isClient && activePopover === 'chat' && (
         <div

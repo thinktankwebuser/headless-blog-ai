@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react';
+import { usePathname } from 'next/navigation';
 import { useContextDetection, TabType } from '@/hooks/useContextDetection';
 import { useUnifiedChat } from '@/hooks/useUnifiedChat';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
@@ -31,12 +32,14 @@ function UnifiedChatWidget() {
   const [touchStartTime, setTouchStartTime] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  const pathname = usePathname();
   const contextConfig = useContextDetection();
   const { messages, loading, error, sendMessage, clearMessages, getMessagesForContext } = useUnifiedChat();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const focusTrapRef = useFocusTrap({ isActive: isOpen, restoreFocus: true });
+  const prevPathname = useRef(pathname);
 
   // Set smart defaults when modal opens (only on initial open, not when context updates)
   useEffect(() => {
@@ -47,7 +50,10 @@ function UnifiedChatWidget() {
   }, [isOpen]); // Removed contextConfig dependencies to prevent state reset mid-conversation
 
   // Get messages for current context
-  const currentMessages = getMessagesForContext(activeTab);
+  const currentMessages = getMessagesForContext(
+    activeTab,
+    activeTab === 'blog' && activeChip === 'This post' ? contextConfig.postSlug : undefined
+  );
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -79,6 +85,15 @@ function UnifiedChatWidget() {
       return () => clearTimeout(timer);
     }
   }, [showCapabilityToast]);
+
+  // Navigation tracking - preserve all individual chat histories
+  useEffect(() => {
+    if (pathname !== prevPathname.current) {
+      // With new architecture, each blog post maintains its own history
+      // No clearing needed - just track the pathname change
+      prevPathname.current = pathname;
+    }
+  }, [pathname]);
 
   // Mobile keyboard handling
   useEffect(() => {
@@ -177,19 +192,25 @@ function UnifiedChatWidget() {
     // Don't clear messages - keep conversation history
   }, []);
 
-  const clearMessagesAndQuestions = useCallback((context?: 'portfolio' | 'blog') => {
+  const clearMessagesAndQuestions = useCallback((context?: 'portfolio' | 'blog' | 'all' | string) => {
     clearMessages(context);
-    if (context) {
+    if (context === 'portfolio') {
       setUsedQuestions(prev => ({
         ...prev,
-        [context]: []
+        blog: []
       }));
-    } else {
+    } else if (context === 'blog') {
+      setUsedQuestions(prev => ({
+        ...prev,
+        portfolio: []
+      }));
+    } else if (!context) {
       setUsedQuestions({
         portfolio: [],
         blog: []
       });
     }
+    // For specific blog post slugs, we don't need to clear used questions
   }, [clearMessages]);
 
   // Reset used questions when switching tabs

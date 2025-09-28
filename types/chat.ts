@@ -26,7 +26,9 @@ export interface UnifiedChatResponse {
 
 export interface ChatState {
   portfolioMessages: UnifiedChatMessage[];
-  blogMessages: UnifiedChatMessage[];
+  blogMessages: {
+    [key: string]: UnifiedChatMessage[]; // key can be 'general' or post slug
+  };
   loading: boolean;
   error: string | null;
 }
