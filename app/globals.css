@@ -3665,8 +3665,7 @@ div[class*="chat-modal"] div[class*="chat-panel"] {
     height: 100dvh; /* Use dynamic viewport height for better mobile support */
     max-height: 100vh;
     max-height: 100dvh;
-    min-height: 100vh;
-    min-height: 100dvh;
+    /* Remove min-height to prevent overflow - let content scroll internally */
     border-radius: 0;
     margin-top: 0;
     /* Touch gesture support */
