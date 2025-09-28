@@ -38,13 +38,13 @@ function UnifiedChatWidget() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const focusTrapRef = useFocusTrap({ isActive: isOpen, restoreFocus: true });
 
-  // Set smart defaults when modal opens
+  // Set smart defaults when modal opens (only on initial open, not when context updates)
   useEffect(() => {
     if (isOpen) {
       setActiveTab(contextConfig.defaultTab);
       setActiveChip(contextConfig.contextChips[0] || '');
     }
-  }, [isOpen, contextConfig.defaultTab, contextConfig.contextChips]);
+  }, [isOpen]); // Removed contextConfig dependencies to prevent state reset mid-conversation
 
   // Get messages for current context
   const currentMessages = getMessagesForContext(activeTab);
