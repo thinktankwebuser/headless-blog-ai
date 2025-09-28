@@ -8,11 +8,15 @@ import ChatQuestions, { QuestionData } from '@/components/shared/ChatQuestions';
 import ChatLoadingState from '@/components/shared/ChatLoadingState';
 import ChatErrorState from '@/components/shared/ChatErrorState';
 import ChatWelcome from '@/components/shared/ChatWelcome';
+import { BlogSection } from '@/lib/blog-processor';
 
 interface BlogAIContentProps {
   postContent: string;
   postSlug: string;
   originalContent: React.ReactNode;
+  sections: BlogSection[];
+  readingTime: number;
+  wordCount: number;
 }
 
 type ContentType = 'overview' | 'takeaways';
