@@ -18,8 +18,8 @@ export const siteConfig = {
     connectedSince: "Jul 24, 2010"
   },
   site: {
-    name: "Austin Puthur James",
-    title: "Austin's Portfolio & Blog",
+    name: "Thinking in CAPITAL",
+    title: "A space to explore ideas, expand vision, shape systems, and succeed in an evolving economy.",
     description: "Insights on fintech, AI, and product leadership",
     url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
   },

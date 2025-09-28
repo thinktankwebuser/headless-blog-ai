@@ -5,7 +5,9 @@ import { fetchPosts, formatDate } from '@/lib/wp';
 export const revalidate = 300; // 5 minutes ISR
 
 export default async function BlogPage() {
-  const posts = await fetchPosts(10);
+  const allPosts = await fetchPosts(10);
+  // Filter out the featured post to avoid duplication
+  const posts = allPosts.filter(post => post.slug !== 'thinking-in-capital');
 
   if (posts.length === 0) {
     return (
@@ -20,7 +22,6 @@ export default async function BlogPage() {
     <div>
       <header className="blog-header">
         <h1 className="blog-title">Latest Insights</h1>
-        <p className="blog-subtitle">Discover breakthrough ideas and expert analysis on digital innovation</p>
       </header>
 
       <div className="post-grid">

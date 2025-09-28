@@ -60,7 +60,13 @@ async function generateAnswer(question: string, matches: PortfolioMatch[]): Prom
   answer: string | null;
   refusal: boolean;
   message?: string;
-  citations: Array<{ path: string; heading: string | null; similarity: number }>;
+  citations: Array<{
+    path: string;
+    heading: string | null;
+    similarity: number;
+    content?: string;
+    url?: string;
+  }>;
 }> {
   // If no relevant matches found, return refusal
   if (matches.length === 0) {
@@ -142,7 +148,9 @@ Rules:
       citations: matches.slice(0, 3).map(match => ({
         path: match.path,
         heading: match.heading,
-        similarity: Math.round(match.similarity * 100) / 100
+        similarity: Math.round(match.similarity * 100) / 100,
+        content: match.content?.substring(0, 200) + '...' || '',
+        url: `/?topic=${encodeURIComponent(match.path.toLowerCase().replace(/\.(md|txt)$/i, '').replace(/[^a-z0-9]+/g, '-'))}`
       }))
     };
 

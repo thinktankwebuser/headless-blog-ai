@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
-import ChatWidget from '@/components/ChatWidget';
+import UnifiedChatWidget from '@/components/UnifiedChatWidget/UnifiedChatWidget';
 import ContactModal from '@/components/ContactModal';
 import { siteConfig } from '@/lib/site-config';
 import './globals.css';
@@ -24,22 +24,9 @@ export default function RootLayout({
         <header className="header">
           <div className="container">
             <div className="header-content">
-              <button
-                className="header-brand"
-                onClick={() => setIsContactModalOpen(true)}
-                aria-label="View contact information"
-              >
-                <Image
-                  src={siteConfig.author.avatar}
-                  alt={siteConfig.author.name}
-                  width={60}
-                  height={60}
-                  className="profile-avatar"
-                  quality={100}
-                  priority
-                />
-                <span className="brand-name">{siteConfig.author.name}</span>
-              </button>
+              <Link href="/" className="header-brand">
+                <span className="brand-name">{siteConfig.site.name}</span>
+              </Link>
               <nav className="nav">
                 <Link href="/">{siteConfig.navigation.home}</Link>
                 <Link href="/blog">{siteConfig.navigation.blog}</Link>
@@ -67,7 +54,7 @@ export default function RootLayout({
           </div>
         </footer>
 
-        <ChatWidget />
+        <UnifiedChatWidget />
         <ContactModal
           isOpen={isContactModalOpen}
           onClose={() => setIsContactModalOpen(false)}

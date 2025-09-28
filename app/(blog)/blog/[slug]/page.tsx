@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { fetchPostBySlug, formatDate, cleanWordPressContent } from '@/lib/wp';
+import { processBlogContent } from '@/lib/blog-processor';
 import ShareButtons from '@/components/ShareButtons';
 import BlogAIContent from './BlogAIContent';
 
@@ -19,6 +20,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   if (!post) {
     notFound();
   }
+
+  // Process content for enhanced sections and anchor links
+  const processedContent = processBlogContent(post.content || '', slug);
 
   return (
     <article>
@@ -53,9 +57,15 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         originalContent={
           <div
             className="post-detail-content"
-            dangerouslySetInnerHTML={{ __html: cleanWordPressContent(post.content || '') }}
+            dangerouslySetInnerHTML={{
+              __html: processedContent.contentWithAnchors || cleanWordPressContent(post.content || '')
+            }}
           />
         }
+        // Enhanced Phase 2 data
+        sections={processedContent.sections}
+        readingTime={processedContent.readingTime}
+        wordCount={processedContent.wordCount}
       />
 
       <ShareButtons slug={slug} title={post.title} />

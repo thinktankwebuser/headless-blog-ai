@@ -91,8 +91,10 @@ export async function fetchPostBySlug(slug: string): Promise<PostNode | null> {
   const query = `
     query PostBySlug($slug: ID!) {
       post(id: $slug, idType: SLUG) {
+        slug
         title
         date
+        excerpt
         content
         featuredImage {
           node {
@@ -110,6 +112,36 @@ export async function fetchPostBySlug(slug: string): Promise<PostNode | null> {
   } catch (error) {
     console.error(`Failed to fetch post with slug ${slug}:`, error);
     return null;
+  }
+}
+
+export async function fetchPostsWithFeatured(totalPosts: number = 4, featuredSlug: string = 'thinking-in-capital'): Promise<PostNode[]> {
+  try {
+    // Step 1: Fetch the featured post by slug
+    const featuredPost = await fetchPostBySlug(featuredSlug);
+
+    // Step 2: Fetch other posts (one extra to account for potential featured post duplicate)
+    const allPosts = await fetchPosts(totalPosts + 1);
+
+    // Step 3: Filter out the featured post from the regular posts list
+    const otherPosts = allPosts.filter(post => post.slug !== featuredSlug);
+
+    // Step 4: Combine featured post first, then other posts, up to totalPosts limit
+    const result: PostNode[] = [];
+
+    if (featuredPost) {
+      result.push(featuredPost);
+    }
+
+    // Add other posts until we reach totalPosts
+    const remainingSlots = totalPosts - result.length;
+    result.push(...otherPosts.slice(0, remainingSlots));
+
+    return result;
+  } catch (error) {
+    console.error('Failed to fetch posts with featured:', error);
+    // Fallback to regular fetchPosts if something goes wrong
+    return await fetchPosts(totalPosts);
   }
 }
 

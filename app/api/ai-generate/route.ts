@@ -22,7 +22,7 @@ const RATE_LIMIT_MS = 5000; // 5 seconds between requests
 const MAX_CONTENT_LENGTH = 8000;
 
 export async function POST(request: NextRequest) {
-  try { 
+  try {
     // Basic rate limiting
     const clientIP = request.headers.get('x-forwarded-for') || 'unknown';
     const lastRequest = rateLimit.get(clientIP);
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { content, type, slug, question } = body;
+    const { content, type, slug, question, context, blogMode } = body;
 
     // Validate input
     if (!content || !type) {
@@ -49,9 +49,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!['overview', 'takeaways', 'questions', 'custom_question'].includes(type)) {
+    if (!['overview', 'takeaways', 'questions', 'custom_question', 'blog_search'].includes(type)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid type. Must be "overview", "takeaways", "questions", or "custom_question"' },
+        { success: false, error: 'Invalid type. Must be "overview", "takeaways", "questions", "custom_question", or "blog_search"' },
         { status: 400 }
       );
     }
@@ -94,6 +94,14 @@ export async function POST(request: NextRequest) {
             "Be specific, practical, and engaging in your response.",
             "Use examples from the content when relevant.",
             "If the question can't be fully answered from the content, acknowledge this and provide what insight you can."
+          ].join(" ")
+        : type === 'blog_search'
+        ? [
+            "You are Austin's blog search assistant, helping users find insights across all blog posts.",
+            "Answer questions by drawing connections and patterns across Austin's blog content.",
+            "Be conversational and insightful, highlighting key themes and expertise areas.",
+            "If you can't answer from the available content, suggest related topics Austin has written about.",
+            "Focus on practical insights and actionable takeaways from across the blog."
           ].join(" ")
         : [
             "You are a curious reader who generates natural, valuable questions about content.",
@@ -212,11 +220,32 @@ export async function POST(request: NextRequest) {
     - Include actionable insights when relevant
     `;
 
+    const blogSearchPrompt = `
+    Answer this question about Austin's blog insights: "${question}"
+
+    Draw from across Austin's blog content to provide a comprehensive answer. Format your response as clean HTML:
+
+    <div class="blog-search-answer">
+      <p>Based on Austin's blog insights, here's what I found...</p>
+      <!-- Provide comprehensive answer drawing connections across posts -->
+      <!-- Use <strong> for key concepts and insights -->
+      <!-- Include practical takeaways when relevant -->
+    </div>
+
+    Guidelines:
+    - Synthesize insights across multiple posts when relevant
+    - Highlight Austin's unique perspective and expertise
+    - Be conversational and engaging
+    - Focus on practical, actionable insights
+    - If specific information isn't available, suggest related topics Austin has covered
+    `;
+
     const prompts = {
       overview: `${overviewPrompt}\n\n${truncatedContent}`,
       takeaways: `${takeawaysPrompt}\n\n${truncatedContent}`,
       questions: `${questionsPrompt}\n\n${truncatedContent}`,
-      custom_question: `${customQuestionPrompt}\n\nContent:\n${truncatedContent}`
+      custom_question: `${customQuestionPrompt}\n\nContent:\n${truncatedContent}`,
+      blog_search: `${blogSearchPrompt}\n\nAvailable Blog Content:\n${truncatedContent}`
     };
 
     const completion = await openai.chat.completions.create({
@@ -225,7 +254,7 @@ export async function POST(request: NextRequest) {
         { role: 'system', content: systemByType },
         { role: 'user', content: prompts[type as keyof typeof prompts] }
       ],
-      max_tokens: type === 'overview' ? 600 : type === 'takeaways' ? 250 : type === 'custom_question' ? 400 : 150,
+      max_tokens: type === 'overview' ? 600 : type === 'takeaways' ? 250 : type === 'custom_question' ? 400 : type === 'blog_search' ? 500 : 150,
       temperature: 0.3,
     });
 
