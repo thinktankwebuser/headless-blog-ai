@@ -22,9 +22,14 @@ function UnifiedChatWidget() {
   const [showTransparencyInfo, setShowTransparencyInfo] = useState(false);
   const [hasSeenCapability, setHasSeenCapability] = useState(false);
   const [showCapabilityToast, setShowCapabilityToast] = useState(false);
-  const [usedQuestions, setUsedQuestions] = useState<{[key: string]: string[]}>({
+  const [usedQuestions, setUsedQuestions] = useState<{
+    portfolio: string[];
+    'blog-search': string[];
+    'blog-current': string[];
+  }>({
     portfolio: [],
-    blog: []
+    'blog-search': [],
+    'blog-current': []
   });
 
   // Touch gesture state
@@ -90,11 +95,19 @@ function UnifiedChatWidget() {
     }
   }, [showCapabilityToast]);
 
-  // Navigation tracking - preserve all individual chat histories
+  // Navigation tracking - reset blog-current when leaving or changing blog posts
   useEffect(() => {
     if (pathname !== prevPathname.current) {
-      // With new architecture, each blog post maintains its own history
-      // No clearing needed - just track the pathname change
+      // Reset blog-current questions when navigating between different blog posts or leaving blog
+      const wasOnBlogPost = prevPathname.current?.startsWith('/blog/') && prevPathname.current !== '/blog';
+      const nowOnBlogPost = pathname?.startsWith('/blog/') && pathname !== '/blog';
+
+      if (wasOnBlogPost && (!nowOnBlogPost || pathname !== prevPathname.current)) {
+        setUsedQuestions(prev => ({
+          ...prev,
+          'blog-current': []
+        }));
+      }
       prevPathname.current = pathname;
     }
   }, [pathname]);
@@ -105,11 +118,13 @@ function UnifiedChatWidget() {
   //   // The CSS already handles mobile layout properly
   // }, [isOpen]);
 
-  const handleSend = useCallback(async () => {
-    if (!inputValue.trim() || loading) return;
+  const handleSend = useCallback(async (directQuestion?: string) => {
+    const question = directQuestion || inputValue.trim();
+    if (!question || loading) return;
 
-    const question = inputValue.trim();
-    setInputValue('');
+    if (!directQuestion) {
+      setInputValue('');
+    }
 
     // Determine context based on active tab and chip
     let context: 'portfolio' | 'blog-post' | 'blog-search' = 'portfolio';
@@ -165,6 +180,11 @@ function UnifiedChatWidget() {
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
+    // Reset blog-current questions when closing widget
+    setUsedQuestions(prev => ({
+      ...prev,
+      'blog-current': []
+    }));
     // Don't clear messages - keep conversation history
   }, []);
 
@@ -173,7 +193,8 @@ function UnifiedChatWidget() {
     if (context === 'portfolio') {
       setUsedQuestions(prev => ({
         ...prev,
-        blog: []
+        'blog-search': [],
+        'blog-current': []
       }));
     } else if (context === 'blog') {
       setUsedQuestions(prev => ({
@@ -183,20 +204,24 @@ function UnifiedChatWidget() {
     } else if (!context) {
       setUsedQuestions({
         portfolio: [],
-        blog: []
+        'blog-search': [],
+        'blog-current': []
       });
     }
     // For specific blog post slugs, we don't need to clear used questions
   }, [clearMessages]);
 
-  // Reset used questions when switching tabs
-  useEffect(() => {
-    const contextKey = activeTab === 'portfolio' ? 'portfolio' : 'blog';
-    setUsedQuestions(prev => ({
-      ...prev,
-      [contextKey]: []
-    }));
-  }, [activeTab]);
+  // Helper function to determine context key for used questions
+  const getUsedQuestionsContextKey = useCallback(() => {
+    if (activeTab === 'portfolio') return 'portfolio';
+    if (activeTab === 'blog' && activeChip === 'This post' && pathname?.startsWith('/blog/') && pathname !== '/blog') {
+      return 'blog-current';
+    }
+    return 'blog-search'; // Default for blog search or fallback
+  }, [activeTab, activeChip, pathname]);
+
+  // Reset 'blog-current' when switching to a different blog post
+  // (handled by pathname change effect below to avoid double resets)
 
   // Touch gesture handlers for swipe-to-close
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -238,18 +263,18 @@ function UnifiedChatWidget() {
   }, [touchStartY, touchStartTime, handleClose]);
 
   const handleQuestionClick = useCallback(async (questionText: string) => {
-    setInputValue(questionText);
+    if (loading) return;
 
     // Mark question as used
-    const contextKey = activeTab === 'portfolio' ? 'portfolio' : 'blog';
+    const contextKey = getUsedQuestionsContextKey();
     setUsedQuestions(prev => ({
       ...prev,
       [contextKey]: [...prev[contextKey], questionText]
     }));
 
-    // Auto-send the question
-    setTimeout(() => handleSend(), 100);
-  }, [handleSend, activeTab]);
+    // Send question directly without delay
+    await handleSend(questionText);
+  }, [handleSend, getUsedQuestionsContextKey, loading]);
 
   const getCurrentCapabilityStatement = useMemo(() => {
     if (activeTab === 'portfolio') {
@@ -264,7 +289,7 @@ function UnifiedChatWidget() {
   }, [activeTab, activeChip]);
 
   const getCurrentExampleQuestions = useMemo(() => {
-    const contextKey = activeTab === 'portfolio' ? 'portfolio' : 'blog';
+    const contextKey = getUsedQuestionsContextKey();
     const usedInContext = usedQuestions[contextKey] || [];
 
     // Tab-specific questions based on current active tab
@@ -295,7 +320,7 @@ function UnifiedChatWidget() {
 
     // Filter out used questions
     return allQuestions.filter(question => !usedInContext.includes(question));
-  }, [activeTab, activeChip, usedQuestions]);
+  }, [activeTab, activeChip, usedQuestions, contextConfig.dynamicQuestions, pathname]);
 
   if (!isOpen) {
     return (
