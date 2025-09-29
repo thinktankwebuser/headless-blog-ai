@@ -241,50 +241,8 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
 
 
   const loadAdditionalQuestions = async () => {
-    if (questionsLoaded || questionsLoading || additionalQuestions.length > 0) return;
-
-    setQuestionsLoading(true);
-    setQuestionsError(null);
-    try {
-      const response = await fetch('/api/ai-generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: postContent,
-          type: 'questions',
-          slug: postSlug || 'unknown'
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to load questions');
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        try {
-          // Clean the response by removing markdown code block delimiters
-          const cleanedContent = data.content
-            .replace(/^```json\s*/i, '')
-            .replace(/\s*```$/, '')
-            .trim();
-          const questions = JSON.parse(cleanedContent);
-          if (Array.isArray(questions)) {
-            setAdditionalQuestions(questions);
-          }
-        } catch (parseError) {
-          setQuestionsError('Unable to parse questions from server');
-        }
-      } else {
-        setQuestionsError('Server error loading questions');
-      }
-    } catch (error) {
-      setQuestionsError('Network error. Check your connection and try again.');
-    } finally {
-      setQuestionsLoading(false);
-      setQuestionsLoaded(true);
-    }
+    // Disabled: Questions are now handled by the chat widget
+    setQuestionsLoaded(true);
   };
 
   const retryLoadQuestions = () => {
