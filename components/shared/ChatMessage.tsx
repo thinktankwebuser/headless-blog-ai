@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // Simple markdown-to-HTML converter for basic formatting
 const convertMarkdownToHTML = (markdown: string): string => {
@@ -42,20 +42,70 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   isHTML = false,
   className = ''
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [needsExpansion, setNeedsExpansion] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+
   // Process content for assistant messages
   const processedContent = message.role === 'assistant' && isHTML ?
     (isMarkdown(message.content) ? convertMarkdownToHTML(message.content) : message.content) :
     message.content;
 
+  // Check if content needs expansion on mobile
+  useEffect(() => {
+    const checkExpansion = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+
+      if (mobile && contentRef.current) {
+        // Use a small delay to ensure content is rendered
+        setTimeout(() => {
+          if (contentRef.current) {
+            const height = contentRef.current.scrollHeight;
+            setNeedsExpansion(height > 120); // ~6-8 lines threshold
+          }
+        }, 10);
+      } else {
+        setNeedsExpansion(false);
+      }
+    };
+
+    checkExpansion();
+    window.addEventListener('resize', checkExpansion);
+    return () => window.removeEventListener('resize', checkExpansion);
+  }, [message.content, processedContent]);
+
+  const handleToggleExpansion = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <div className={`message message-${message.role} ${className}`}>
-      <div className="message-content">
+      <div
+        ref={contentRef}
+        className={`message-content ${
+          isMobile && needsExpansion && !isExpanded ? 'collapsed-mobile' : ''
+        }`}
+      >
         {message.role === 'assistant' && isHTML ? (
           <div dangerouslySetInnerHTML={{ __html: processedContent }} />
         ) : (
           message.content
         )}
       </div>
+
+      {isMobile && needsExpansion && (
+        <button
+          onClick={handleToggleExpansion}
+          className="read-more-btn"
+          type="button"
+          aria-label={isExpanded ? 'Show less content' : 'Show more content'}
+        >
+          {isExpanded ? 'Show less' : 'Read more'}
+        </button>
+      )}
+
       {message.citations && message.citations.length > 0 && (
         <div className="message-citations">
           {message.citations.map((citation, index) => (

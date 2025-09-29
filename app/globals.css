@@ -1782,6 +1782,59 @@ div.chat-modal div.chat-panel {
     max-width: 90%;
   }
 
+  /* Mobile Read More Functionality */
+  .message-content.collapsed-mobile {
+    max-height: 120px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .message-content.collapsed-mobile::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(to bottom, transparent, white);
+    pointer-events: none;
+  }
+
+  .message-assistant .message-content.collapsed-mobile::after {
+    background: linear-gradient(to bottom, transparent, #f1f3f4);
+  }
+
+  /* Handle different assistant message backgrounds */
+  .unified-chat-modal .message-assistant .message-content.collapsed-mobile::after {
+    background: linear-gradient(to bottom, transparent, white);
+  }
+
+  .read-more-btn {
+    background: none;
+    border: none;
+    color: #4338ca;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 0 2px 0;
+    margin-top: 4px;
+    cursor: pointer;
+    text-align: left;
+    width: auto;
+    display: inline-block;
+    transition: color 0.2s ease;
+  }
+
+  .read-more-btn:hover {
+    color: #3730a3;
+    text-decoration: underline;
+  }
+
+  .read-more-btn:focus {
+    outline: 2px solid #4338ca;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
   .preset-button {
     font-size: 13px;
     padding: 10px 16px;
