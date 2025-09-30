@@ -6,8 +6,8 @@ export const siteConfig = {
     name: "Austin Puthur James",
     title: "Product & Solutions Leader | Money Movements | Applied AI in Fintech | Payments Optimisation | B2B & Consumer Payments",
     shortTitle: "Product & Solutions Leader",
-    company: "FIS",
-    email: "austinputhur@gmail.com",
+    company: "Think in Capital",
+    email: "thinktankwebuser@gmail.com",
     linkedin: {
       url: "https://linkedin.com/in/austinjamesp",
       display: "linkedin.com/in/austinjamesp"

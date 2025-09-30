@@ -17,6 +17,7 @@ import ContextChips from './ContextChips';
 function UnifiedChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('portfolio');
+
   const [activeChip, setActiveChip] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [showTransparencyInfo, setShowTransparencyInfo] = useState(false);
@@ -46,13 +47,13 @@ function UnifiedChatWidget() {
   const focusTrapRef = useFocusTrap({ isActive: isOpen, restoreFocus: true });
   const prevPathname = useRef(pathname);
 
-  // Set smart defaults when modal opens (only on initial open, not when context updates)
+
+  // Set default chip when switching to blog tab
   useEffect(() => {
-    if (isOpen) {
-      setActiveTab(contextConfig.defaultTab);
-      setActiveChip(contextConfig.contextChips[0] || '');
+    if (activeTab === 'blog' && contextConfig.contextChips.length > 0 && !activeChip) {
+      setActiveChip(contextConfig.contextChips[0]);
     }
-  }, [isOpen]); // Removed contextConfig dependencies to prevent state reset mid-conversation
+  }, [activeTab, contextConfig.contextChips, activeChip]);
 
   // Get messages for current context
   const currentMessages = getMessagesForContext(
@@ -170,6 +171,9 @@ function UnifiedChatWidget() {
       setActiveTab(newTab);
     }
   }, []);
+
+  const handlePortfolioTabClick = () => setActiveTab('portfolio');
+  const handleBlogTabClick = () => setActiveTab('blog');
 
   const handleModalKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -379,12 +383,36 @@ function UnifiedChatWidget() {
         </header>
 
         {/* Tab Navigation */}
-        <div className="chat-tabs" role="tablist" aria-label="Chat mode selection">
+        <div style={{
+          display: 'flex',
+          borderBottom: 'none',
+          backgroundImage: 'linear-gradient(45deg,#0d0cd0,#2726dd)',
+          boxShadow: '0 2px 8px rgba(39, 38, 221, 0.1)'
+        }} role="tablist" aria-label="Chat mode selection">
           <button
-            onClick={() => setActiveTab('portfolio')}
+            onClick={handlePortfolioTabClick}
             onKeyDown={(e) => handleTabKeyDown(e, 'portfolio')}
-            className={`chat-tab ${activeTab === 'portfolio' ? 'active' : ''}`}
-            disabled={loading}
+            style={{
+              all: 'unset',
+              flex: '1',
+              padding: '14px 24px',
+              background: activeTab === 'portfolio'
+                ? 'linear-gradient(135deg, #0d0cd0, #2726dd)'
+                : '#ffffff',
+              color: activeTab === 'portfolio' ? '#ffffff' : '#1f2937',
+              fontWeight: activeTab === 'portfolio' ? '700' : '500',
+              fontSize: '16px',
+              cursor: 'pointer',
+              border: 'none',
+              borderRadius: '6px',
+              position: 'relative',
+              transform: activeTab === 'portfolio' ? 'translateY(-3px)' : 'translateY(0)',
+              boxShadow: activeTab === 'portfolio'
+                ? '0 4px 12px rgba(13, 12, 208, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                : '0 2px 4px rgba(0, 0, 0, 0.1)',
+              textShadow: activeTab === 'portfolio' ? '0 1px 2px rgba(0, 0, 0, 0.3)' : 'none',
+              textAlign: 'center'
+            }}
             role="tab"
             aria-selected={activeTab === 'portfolio'}
             aria-controls="portfolio-panel"
@@ -395,10 +423,29 @@ function UnifiedChatWidget() {
             <span aria-hidden="true">📋</span> Portfolio
           </button>
           <button
-            onClick={() => setActiveTab('blog')}
+            onClick={handleBlogTabClick}
             onKeyDown={(e) => handleTabKeyDown(e, 'blog')}
-            className={`chat-tab ${activeTab === 'blog' ? 'active' : ''}`}
-            disabled={loading}
+            style={{
+              all: 'unset',
+              flex: '1',
+              padding: '14px 24px',
+              background: activeTab === 'blog'
+                ? 'linear-gradient(135deg, #0d0cd0, #2726dd)'
+                : '#ffffff',
+              color: activeTab === 'blog' ? '#ffffff' : '#1f2937',
+              fontWeight: activeTab === 'blog' ? '700' : '500',
+              fontSize: '16px',
+              cursor: 'pointer',
+              border: 'none',
+              borderRadius: '6px',
+              position: 'relative',
+              transform: activeTab === 'blog' ? 'translateY(-3px)' : 'translateY(0)',
+              boxShadow: activeTab === 'blog'
+                ? '0 4px 12px rgba(13, 12, 208, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                : '0 2px 4px rgba(0, 0, 0, 0.1)',
+              textShadow: activeTab === 'blog' ? '0 1px 2px rgba(0, 0, 0, 0.3)' : 'none',
+              textAlign: 'center'
+            }}
             role="tab"
             aria-selected={activeTab === 'blog'}
             aria-controls="blog-panel"
@@ -651,4 +698,4 @@ function UnifiedChatWidget() {
   );
 }
 
-export default memo(UnifiedChatWidget);
+export default UnifiedChatWidget;
