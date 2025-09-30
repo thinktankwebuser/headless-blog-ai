@@ -11,8 +11,6 @@ import ChatLoadingState from '@/components/shared/ChatLoadingState';
 import ChatErrorState from '@/components/shared/ChatErrorState';
 import CitationDisplay from './CitationDisplay';
 import ContextChips from './ContextChips';
-// import SmartSuggestions from './SmartSuggestions'; // COMMENTED OUT FOR SPACE
-// import ContextInsights from './ContextInsights'; // COMMENTED OUT FOR SPACE
 
 function UnifiedChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,19 +19,14 @@ function UnifiedChatWidget() {
   const [activeChip, setActiveChip] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [usedQuestions, setUsedQuestions] = useState<string[]>([]);
-  // Removed: showTransparencyInfo, hasSeenCapability, showCapabilityToast - over-engineered
-
-  // Removed: touch gesture state - unnecessary complexity
 
   const pathname = usePathname();
   const contextConfig = useContextDetection();
-  const { messages, loading, error, sendMessage, clearMessages, getMessagesForContext } = useUnifiedChat();
+  const { messages, loading, error, sendMessage, getMessagesForContext } = useUnifiedChat();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const focusTrapRef = useFocusTrap({ isActive: isOpen, restoreFocus: true });
-  // Removed: prevPathname - no longer needed for complex navigation tracking
-
 
   // Set default chip when switching to blog tab
   useEffect(() => {
@@ -64,9 +57,6 @@ function UnifiedChatWidget() {
     }
   }, [isOpen]);
 
-  // Removed: capability toast useEffects - over-engineered
-
-  // Removed: complex navigation tracking - over-engineered
 
   // Mobile keyboard handling - disabled to prevent header disappearing bug
   // useEffect(() => {
@@ -142,14 +132,6 @@ function UnifiedChatWidget() {
     // Don't clear messages - keep conversation history
   };
 
-  // Removed: clearMessagesAndQuestions - over-engineered
-
-  // Removed: getUsedQuestionsContextKey - over-engineered
-
-  // Reset 'blog-current' when switching to a different blog post
-  // (handled by pathname change effect below to avoid double resets)
-
-  // Removed: touch gesture handlers - unnecessary complexity
 
   const handleQuestionClick = async (questionText: string) => {
     if (loading) return;
@@ -157,7 +139,6 @@ function UnifiedChatWidget() {
     await handleSend(questionText);
   };
 
-  // Removed: getCurrentCapabilityStatement - was for removed capability toast
 
   const getCurrentExampleQuestions = () => {
     let questions: string[] = [];
@@ -276,8 +257,6 @@ function UnifiedChatWidget() {
           />
         )}
 
-        {/* Removed: capability toast - over-engineered */}
-
 
         {/* Messages */}
         <main
@@ -298,22 +277,6 @@ function UnifiedChatWidget() {
                   : 'Search across all of our blog insights'
               }</p>
 
-              {/* Context Insights - Phase 2 enhancement - COMMENTED OUT FOR SPACE */}
-              {/* {contextConfig.contextInsights && (
-                <ContextInsights
-                  insights={contextConfig.contextInsights}
-                  relatedTopics={contextConfig.relatedTopics}
-                />
-              )} */}
-
-              {/* Smart Suggestions - Phase 2 enhancement - COMMENTED OUT FOR SPACE */}
-              {/* {contextConfig.smartSuggestions && contextConfig.smartSuggestions.length > 0 && (
-                <SmartSuggestions
-                  suggestions={contextConfig.smartSuggestions}
-                  onSuggestionClick={handleQuestionClick}
-                  disabled={loading}
-                />
-              )} */}
 
               {/* Enhanced Example Questions */}
               <div className="example-questions">
@@ -426,13 +389,11 @@ function UnifiedChatWidget() {
               <span aria-hidden="true">➤</span>
             </button>
           </div>
-          {/* Removed: character count and transparency footer - over-engineered */}
           <div id="chat-input-help" className="sr-only">
             Press Enter to send your message, or Shift+Enter for a new line. Maximum 500 characters.
           </div>
         </footer>
 
-        {/* Removed: transparency panel - over-engineered */}
       </div>
     </div>
   );
