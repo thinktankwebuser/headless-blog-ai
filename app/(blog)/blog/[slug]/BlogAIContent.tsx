@@ -181,25 +181,15 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
   const [questionsLoaded, setQuestionsLoaded] = useState(false);
   const [questionsLoading, setQuestionsLoading] = useState(false);
   const [questionsError, setQuestionsError] = useState<string | null>(null);
-  const [cachedContentLoading, setCachedContentLoading] = useState<{[key: string]: boolean}>({});
   const { aiContent, loading, errors, generateContent, clearError } = useAIContent(postContent, postSlug);
   const isMobile = useResponsiveModal();
-  const timeoutRefs = useRef<{[key: string]: NodeJS.Timeout}>({});
-  const processedContentRefs = useRef<{[key: string]: boolean}>({});
 
-  // Memoize combined questions array for performance
-  const combinedQuestions = useMemo(() => [
+  const combinedQuestions = [
     ...availableQuestions,
     ...convertAdditionalQuestions(additionalQuestions, loading)
-  ], [availableQuestions, additionalQuestions, loading]);
+  ];
 
-  // Memoize disabled state calculation for performance
-  const isAnyLoading = useMemo(() =>
-    Object.values(loading).some(Boolean) ||
-    Object.values(cachedContentLoading).some(Boolean) ||
-    questionsLoading,
-    [loading, cachedContentLoading, questionsLoading]
-  );
+  const isAnyLoading = Object.values(loading).some(Boolean) || questionsLoading;
 
   const loadAdditionalQuestions = async () => {
     // Disabled: Questions are now handled by the chat widget
@@ -253,14 +243,6 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
     setIsClient(true);
   }, []);
 
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(timeoutRefs.current).forEach(timeout => {
-        if (timeout) clearTimeout(timeout);
-      });
-    };
-  }, []);
 
   // Reset questions when navigating to a different post
   useEffect(() => {
@@ -277,10 +259,7 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
       if (lastMessage.questionType) {
         // Handle primary questions (overview, takeaways)
         const questionType = lastMessage.questionType;
-        const contentKey = `${questionType}-${lastMessage.content}`;
-
-        if (aiContent[questionType] && !loading[questionType] && !processedContentRefs.current[contentKey]) {
-          processedContentRefs.current[contentKey] = true;
+        if (aiContent[questionType] && !loading[questionType]) {
           const cleanedContent = cleanAIContent(aiContent[questionType]);
           setChatMessages(prev => [...prev, { type: 'assistant', content: cleanedContent }]);
         }
@@ -288,10 +267,7 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
         // Handle custom questions - look for custom_question responses
         const question = lastMessage.content;
         const customKey = `custom_question:${question}`;
-        const contentKey = `${customKey}-${question}`;
-
-        if (aiContent[customKey] && !loading[customKey] && !processedContentRefs.current[contentKey]) {
-          processedContentRefs.current[contentKey] = true;
+        if (aiContent[customKey] && !loading[customKey]) {
           const cleanedContent = cleanAIContent(aiContent[customKey]);
           setChatMessages(prev => [...prev, { type: 'assistant', content: cleanedContent }]);
         }
@@ -326,31 +302,10 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
       // Remove the asked question from available questions
       setAvailableQuestions(prev => prev.filter(q => q.key !== questionKey));
 
-      // If content already exists, show brief loading then add cached content
+      // If content already exists, show it immediately
       if (aiContent[questionType]) {
-        // Prevent race condition - don't set loading if already loading for this question type
-        if (cachedContentLoading[questionType]) {
-          return; // Exit early if already processing this cached content
-        }
-
-        // Clear any existing timeout for this question type
-        if (timeoutRefs.current[questionType]) {
-          clearTimeout(timeoutRefs.current[questionType]);
-        }
-
         const cleanedContent = cleanAIContent(aiContent[questionType]);
-
-        // Set temporary loading state for visual feedback
-        setCachedContentLoading(prev => ({ ...prev, [questionType]: true }));
-
-        // Store timeout reference for cleanup
-        timeoutRefs.current[questionType] = setTimeout(() => {
-          setChatMessages(prev => [...prev, { type: 'assistant', content: cleanedContent }]);
-          // Clear the temporary loading state
-          setCachedContentLoading(prev => ({ ...prev, [questionType]: false }));
-          // Clean up timeout reference
-          delete timeoutRefs.current[questionType];
-        }, siteConfig.chat.timeouts.cachedContentDelay);
+        setChatMessages(prev => [...prev, { type: 'assistant', content: cleanedContent }]);
       } else if (!loading[questionType] && !errors[questionType]) {
         // Generate content if not already generated and not currently loading
         await generateContent(questionType);
@@ -379,16 +334,7 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
       { text: 'Give me quick overview', key: 'overview' },
       { text: 'What are my takeaways?', key: 'takeaways' }
     ]);
-    setCachedContentLoading({}); // Reset cached content loading states
 
-    // Clean up any pending timeouts to prevent memory leaks
-    Object.values(timeoutRefs.current).forEach(timeout => {
-      if (timeout) clearTimeout(timeout);
-    });
-    timeoutRefs.current = {};
-
-    // Reset processed content tracking to allow re-processing
-    processedContentRefs.current = {};
 
     // NOTE: Don't reset additionalQuestions or questionsLoaded - they're specific to this post content
     // setAdditionalQuestions([]);  // Keep questions loaded for this post
@@ -440,7 +386,7 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
                   ))}
 
                   {/* Show loading state */}
-                  {(Object.values(loading).some(Boolean) || Object.values(cachedContentLoading).some(Boolean)) && (
+                  {Object.values(loading).some(Boolean) && (
                     <ChatLoadingState />
                   )}
 
