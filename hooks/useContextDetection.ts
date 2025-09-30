@@ -6,22 +6,6 @@ import { useMemo, useState, useEffect } from 'react';
 export type ChatContext = 'portfolio' | 'blog-post' | 'blog-search';
 export type TabType = 'portfolio' | 'blog';
 
-// Enhanced Phase 2 interfaces
-export interface SmartSuggestion {
-  type: 'follow-up' | 'related' | 'deep-dive' | 'comparison';
-  question: string;
-  description: string;
-  confidence: number;
-  category?: string;
-}
-
-export interface ContextInsight {
-  readingTime?: number;
-  wordCount?: number;
-  keyTopics?: string[];
-  relatedContent?: string[];
-  difficulty?: 'beginner' | 'intermediate' | 'advanced';
-}
 
 export interface ContextConfig {
   defaultTab: TabType;
@@ -33,126 +17,29 @@ export interface ContextConfig {
   welcomeMessage: string;
   capabilityStatement: string;
   exampleQuestions: string[];
-  // Enhanced Phase 2 features
-  smartSuggestions?: SmartSuggestion[];
-  contextInsights?: ContextInsight;
   dynamicQuestions?: string[];
-  relatedTopics?: string[];
 }
 
-// Advanced context detection helpers (Phase 2)
-function generateSmartSuggestions(context: ChatContext, postSlug?: string): SmartSuggestion[] {
-  const suggestions: SmartSuggestion[] = [];
-
-  if (context === 'portfolio') {
-    suggestions.push(
-      {
-        type: 'follow-up',
-        question: 'What specific technologies have you worked with recently?',
-        description: 'Get detailed technical expertise',
-        confidence: 0.9,
-        category: 'technical'
-      },
-      {
-        type: 'deep-dive',
-        question: 'Walk me through a complex problem you solved',
-        description: 'Understand problem-solving approach',
-        confidence: 0.85,
-        category: 'experience'
-      },
-      {
-        type: 'comparison',
-        question: 'How do you approach fintech vs other industry challenges?',
-        description: 'Industry-specific insights',
-        confidence: 0.8,
-        category: 'industry'
-      }
-    );
-  } else if (context === 'blog-post') {
-    suggestions.push(
-      {
-        type: 'follow-up',
-        question: 'What are the practical steps to implement this?',
-        description: 'Actionable implementation guidance',
-        confidence: 0.9,
-        category: 'implementation'
-      },
-      {
-        type: 'related',
-        question: 'What related concepts should I explore?',
-        description: 'Discover connected topics',
-        confidence: 0.85,
-        category: 'exploration'
-      },
-      {
-        type: 'deep-dive',
-        question: 'What are the potential challenges with this approach?',
-        description: 'Risk assessment and considerations',
-        confidence: 0.8,
-        category: 'analysis'
-      }
-    );
-  } else if (context === 'blog-search') {
-    suggestions.push(
-      {
-        type: 'comparison',
-        question: 'Compare Austin\'s approaches across different topics',
-        description: 'Cross-topic analysis',
-        confidence: 0.85,
-        category: 'comparison'
-      },
-      {
-        type: 'related',
-        question: 'What are Austin\'s latest insights on emerging trends?',
-        description: 'Current thinking and trends',
-        confidence: 0.8,
-        category: 'trends'
-      }
-    );
-  }
-
-  return suggestions;
-}
-
-
-function getRelatedTopics(context: ChatContext, postSlug?: string): string[] {
-  // Generate related topics based on context
-  const topicMap: Record<ChatContext, string[]> = {
-    'portfolio': ['fintech', 'ai', 'payments', 'leadership', 'innovation', 'digital transformation'],
-    'blog-post': ['implementation', 'best practices', 'case studies', 'frameworks', 'tools'],
-    'blog-search': ['trends', 'insights', 'methodologies', 'industry analysis', 'future outlook']
-  };
-
-  return topicMap[context] || [];
-}
 
 export function useContextDetection(): ContextConfig {
   const pathname = usePathname();
-  const [pageInsights, setPageInsights] = useState<ContextInsight>({});
   const [dynamicQuestions, setDynamicQuestions] = useState<{[slug: string]: string[]}>({});
 
-  // Advanced page content analysis (Phase 2)
+  // Load dynamic questions for blog posts
   useEffect(() => {
-    const analyzePageContent = async () => {
+    const loadDynamicQuestions = async () => {
       if (pathname?.startsWith('/blog/')) {
+        const postSlug = pathname.split('/blog/')[1];
+
+        // Check if we already have questions for this post
+        if (dynamicQuestions[postSlug]) {
+          return;
+        }
+
         try {
-          const postSlug = pathname.split('/blog/')[1];
-
-          // Check if we already have questions for this post
-          if (dynamicQuestions[postSlug]) {
-            return;
-          }
-
           const response = await fetch(`/api/blog-content/${postSlug}`);
           if (response.ok) {
             const data = await response.json();
-            setPageInsights({
-              readingTime: data.readingTime,
-              wordCount: data.wordCount,
-              keyTopics: data.sections?.map((s: any) => s.title).slice(0, 5) || [],
-              relatedContent: [],
-              difficulty: data.wordCount > 1500 ? 'advanced' : data.wordCount > 800 ? 'intermediate' : 'beginner'
-            });
 
             // Generate AI questions for this specific post
             if (data.content) {
@@ -176,8 +63,7 @@ export function useContextDetection(): ContextConfig {
                       .trim();
                     const questions = JSON.parse(cleanedContent);
                     if (Array.isArray(questions) && questions.length > 0) {
-                      // Add 3-second delay before rendering questions to prevent rate limit issues
-                      // Capture the postSlug in closure to prevent stale references
+                      // Add 3-second delay to prevent rate limit issues
                       const currentSlug = postSlug;
                       setTimeout(() => {
                         setDynamicQuestions(prev => ({
@@ -194,13 +80,13 @@ export function useContextDetection(): ContextConfig {
             }
           }
         } catch (error) {
-          console.error('Error analyzing page content:', error);
+          console.error('Error loading dynamic questions:', error);
         }
       }
     };
 
-    analyzePageContent();
-  }, [pathname]);
+    loadDynamicQuestions();
+  }, [pathname, dynamicQuestions]);
 
   return useMemo(() => {
     // Homepage - Portfolio focus
@@ -219,15 +105,11 @@ export function useContextDetection(): ContextConfig {
           'Tell me about your fintech background',
           'Show me a complex integration you\'ve led'
         ],
-        // Enhanced Phase 2 features
-        smartSuggestions: generateSmartSuggestions(context),
-        contextInsights: pageInsights,
         dynamicQuestions: [
           'What makes Austin uniquely qualified for fintech roles?',
           'How do we stay current with emerging technologies?',
           'What\'s Austin\'s leadership philosophy?'
-        ],
-        relatedTopics: getRelatedTopics(context)
+        ]
       };
     }
 
@@ -247,15 +129,11 @@ export function useContextDetection(): ContextConfig {
           'Find posts about payment optimization',
           'How do we approach fintech innovation?'
         ],
-        // Enhanced Phase 2 features
-        smartSuggestions: generateSmartSuggestions(context),
-        contextInsights: pageInsights,
         dynamicQuestions: [
           'What patterns emerge across Austin\'s content?',
           'How has Austin\'s thinking evolved over time?',
           'What are Austin\'s contrarian views in the industry?'
-        ],
-        relatedTopics: getRelatedTopics(context)
+        ]
       };
     }
 
@@ -285,11 +163,7 @@ export function useContextDetection(): ContextConfig {
           'Summarize this post in 5 bullets',
           'What are the key takeaways?'
         ],
-        // Enhanced Phase 2 features
-        smartSuggestions: generateSmartSuggestions(context, postSlug),
-        contextInsights: pageInsights,
-        dynamicQuestions: questionsForPost,
-        relatedTopics: getRelatedTopics(context, postSlug)
+        dynamicQuestions: questionsForPost
       };
     }
 
@@ -308,15 +182,11 @@ export function useContextDetection(): ContextConfig {
         'Tell me about your recent projects',
         'What are your core skills?'
       ],
-      // Enhanced Phase 2 features
-      smartSuggestions: generateSmartSuggestions(defaultContext),
-      contextInsights: pageInsights,
       dynamicQuestions: [
         'What makes Austin uniquely qualified for fintech roles?',
         'How do we stay current with emerging technologies?',
         'What\'s Austin\'s leadership philosophy?'
-      ],
-      relatedTopics: getRelatedTopics(defaultContext)
+      ]
     };
-  }, [pathname, pageInsights, dynamicQuestions]);
+  }, [pathname, dynamicQuestions]);
 }
