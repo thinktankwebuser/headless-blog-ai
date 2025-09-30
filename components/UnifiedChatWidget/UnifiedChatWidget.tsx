@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useContextDetection, TabType } from '@/hooks/useContextDetection';
 import { useUnifiedChat } from '@/hooks/useUnifiedChat';
@@ -20,23 +20,10 @@ function UnifiedChatWidget() {
 
   const [activeChip, setActiveChip] = useState('');
   const [inputValue, setInputValue] = useState('');
-  const [showTransparencyInfo, setShowTransparencyInfo] = useState(false);
-  const [hasSeenCapability, setHasSeenCapability] = useState(false);
-  const [showCapabilityToast, setShowCapabilityToast] = useState(false);
-  const [usedQuestions, setUsedQuestions] = useState<{
-    portfolio: string[];
-    'blog-search': string[];
-    'blog-current': string[];
-  }>({
-    portfolio: [],
-    'blog-search': [],
-    'blog-current': []
-  });
+  const [usedQuestions, setUsedQuestions] = useState<string[]>([]);
+  // Removed: showTransparencyInfo, hasSeenCapability, showCapabilityToast - over-engineered
 
-  // Touch gesture state
-  const [touchStartY, setTouchStartY] = useState<number | null>(null);
-  const [touchStartTime, setTouchStartTime] = useState<number | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  // Removed: touch gesture state - unnecessary complexity
 
   const pathname = usePathname();
   const contextConfig = useContextDetection();
@@ -45,7 +32,7 @@ function UnifiedChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const focusTrapRef = useFocusTrap({ isActive: isOpen, restoreFocus: true });
-  const prevPathname = useRef(pathname);
+  // Removed: prevPathname - no longer needed for complex navigation tracking
 
 
   // Set default chip when switching to blog tab
@@ -77,41 +64,9 @@ function UnifiedChatWidget() {
     }
   }, [isOpen]);
 
-  // Auto-dismissing capability toast
-  useEffect(() => {
-    if (isOpen && !hasSeenCapability) {
-      setShowCapabilityToast(true);
-      setHasSeenCapability(true);
-    }
-  }, [isOpen, hasSeenCapability]);
+  // Removed: capability toast useEffects - over-engineered
 
-  // Auto-dismiss timer for capability toast
-  useEffect(() => {
-    if (showCapabilityToast) {
-      const timer = setTimeout(() => {
-        setShowCapabilityToast(false);
-      }, 2000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [showCapabilityToast]);
-
-  // Navigation tracking - reset blog-current when leaving or changing blog posts
-  useEffect(() => {
-    if (pathname !== prevPathname.current) {
-      // Reset blog-current questions when navigating between different blog posts or leaving blog
-      const wasOnBlogPost = prevPathname.current?.startsWith('/blog/') && prevPathname.current !== '/blog';
-      const nowOnBlogPost = pathname?.startsWith('/blog/') && pathname !== '/blog';
-
-      if (wasOnBlogPost && (!nowOnBlogPost || pathname !== prevPathname.current)) {
-        setUsedQuestions(prev => ({
-          ...prev,
-          'blog-current': []
-        }));
-      }
-      prevPathname.current = pathname;
-    }
-  }, [pathname]);
+  // Removed: complex navigation tracking - over-engineered
 
   // Mobile keyboard handling - disabled to prevent header disappearing bug
   // useEffect(() => {
@@ -119,7 +74,7 @@ function UnifiedChatWidget() {
   //   // The CSS already handles mobile layout properly
   // }, [isOpen]);
 
-  const handleSend = useCallback(async (directQuestion?: string) => {
+  const handleSend = async (directQuestion?: string) => {
     const question = directQuestion || inputValue.trim();
     if (!question || loading) return;
 
@@ -151,16 +106,16 @@ function UnifiedChatWidget() {
     setTimeout(() => {
       inputRef.current?.focus();
     }, 100);
-  }, [inputValue, loading, activeTab, activeChip, contextConfig.postSlug, sendMessage]);
+  };
 
-  const handleInputKeyDown = useCallback((e: React.KeyboardEvent) => {
+  const handleInputKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
-  }, [handleSend]);
+  };
 
-  const handleTabKeyDown = useCallback((e: React.KeyboardEvent, tabType: TabType) => {
+  const handleTabKeyDown = (e: React.KeyboardEvent, tabType: TabType) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       setActiveTab(tabType);
@@ -170,137 +125,45 @@ function UnifiedChatWidget() {
       const newTab = tabType === 'portfolio' ? 'blog' : 'portfolio';
       setActiveTab(newTab);
     }
-  }, []);
+  };
 
   const handlePortfolioTabClick = () => setActiveTab('portfolio');
   const handleBlogTabClick = () => setActiveTab('blog');
 
-  const handleModalKeyDown = useCallback((e: React.KeyboardEvent) => {
+  const handleModalKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       e.preventDefault();
       handleClose();
     }
-  }, []);
+  };
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     setIsOpen(false);
-    // Reset blog-current questions when closing widget
-    setUsedQuestions(prev => ({
-      ...prev,
-      'blog-current': []
-    }));
     // Don't clear messages - keep conversation history
-  }, []);
+  };
 
-  const clearMessagesAndQuestions = useCallback((context?: 'portfolio' | 'blog' | 'all' | string) => {
-    clearMessages(context);
-    if (context === 'portfolio') {
-      setUsedQuestions(prev => ({
-        ...prev,
-        'blog-search': [],
-        'blog-current': []
-      }));
-    } else if (context === 'blog') {
-      setUsedQuestions(prev => ({
-        ...prev,
-        portfolio: []
-      }));
-    } else if (!context) {
-      setUsedQuestions({
-        portfolio: [],
-        'blog-search': [],
-        'blog-current': []
-      });
-    }
-    // For specific blog post slugs, we don't need to clear used questions
-  }, [clearMessages]);
+  // Removed: clearMessagesAndQuestions - over-engineered
 
-  // Helper function to determine context key for used questions
-  const getUsedQuestionsContextKey = useCallback(() => {
-    if (activeTab === 'portfolio') return 'portfolio';
-    if (activeTab === 'blog' && activeChip === 'This post' && pathname?.startsWith('/blog/') && pathname !== '/blog') {
-      return 'blog-current';
-    }
-    return 'blog-search'; // Default for blog search or fallback
-  }, [activeTab, activeChip, pathname]);
+  // Removed: getUsedQuestionsContextKey - over-engineered
 
   // Reset 'blog-current' when switching to a different blog post
   // (handled by pathname change effect below to avoid double resets)
 
-  // Touch gesture handlers for swipe-to-close
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    setTouchStartY(touch.clientY);
-    setTouchStartTime(Date.now());
-    setIsDragging(false);
-  }, []);
+  // Removed: touch gesture handlers - unnecessary complexity
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (touchStartY === null) return;
-
-    const touch = e.touches[0];
-    const deltaY = touch.clientY - touchStartY;
-
-    // Only consider downward swipes from the header area
-    if (deltaY > 10) {
-      setIsDragging(true);
-    }
-  }, [touchStartY]);
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (touchStartY === null || touchStartTime === null) return;
-
-    const touch = e.changedTouches[0];
-    const deltaY = touch.clientY - touchStartY;
-    const deltaTime = Date.now() - touchStartTime;
-    const velocity = deltaY / deltaTime;
-
-    // Swipe down to close: minimum 100px movement or high velocity
-    if ((deltaY > 100 && deltaTime < 500) || velocity > 0.5) {
-      handleClose();
-    }
-
-    // Reset touch state
-    setTouchStartY(null);
-    setTouchStartTime(null);
-    setIsDragging(false);
-  }, [touchStartY, touchStartTime, handleClose]);
-
-  const handleQuestionClick = useCallback(async (questionText: string) => {
+  const handleQuestionClick = async (questionText: string) => {
     if (loading) return;
-
-    // Mark question as used
-    const contextKey = getUsedQuestionsContextKey();
-    setUsedQuestions(prev => ({
-      ...prev,
-      [contextKey]: [...prev[contextKey], questionText]
-    }));
-
-    // Send question directly without delay
+    setUsedQuestions(prev => [...prev, questionText]);
     await handleSend(questionText);
-  }, [handleSend, getUsedQuestionsContextKey, loading]);
+  };
 
-  const getCurrentCapabilityStatement = useMemo(() => {
-    if (activeTab === 'portfolio') {
-      return 'AI Assistant trained on Austin\'s résumé, projects, and case studies. I provide information-only responses and don\'t give personal finance, legal, or investment advice. Please verify important details independently.';
-    } else {
-      if (activeChip === 'This post') {
-        return 'AI Assistant analyzing this specific blog post. I summarize content and cite sections used. Responses are AI-generated based on the post content.';
-      } else {
-        return 'AI Assistant searching Austin\'s blog posts. I synthesize information across posts and cite sources. All responses are AI-generated and should be verified for accuracy.';
-      }
-    }
-  }, [activeTab, activeChip]);
+  // Removed: getCurrentCapabilityStatement - was for removed capability toast
 
-  const getCurrentExampleQuestions = useMemo(() => {
-    const contextKey = getUsedQuestionsContextKey();
-    const usedInContext = usedQuestions[contextKey] || [];
-
-    // Tab-specific questions based on current active tab
-    let allQuestions: string[] = [];
+  const getCurrentExampleQuestions = () => {
+    let questions: string[] = [];
 
     if (activeTab === 'portfolio') {
-      allQuestions = [
+      questions = [
         'What\'s your experience with finance?',
         'Tell me about your fintech background',
         'Show me a complex integration you\'ve led'
@@ -308,13 +171,12 @@ function UnifiedChatWidget() {
     } else {
       // Blog tab - different questions based on context chip
       if (activeChip === 'This post') {
-        // Use dynamic questions generated by the Q&A bot for this specific post
-        allQuestions = contextConfig.dynamicQuestions || [
+        questions = contextConfig.dynamicQuestions || [
           'Summarize this post in 5 bullets',
           'What are the key takeaways?'
         ];
       } else {
-        allQuestions = [
+        questions = [
           'What key insights on AI do we have?',
           'Find posts about payment optimization',
           'How do we approach fintech innovation?'
@@ -322,9 +184,8 @@ function UnifiedChatWidget() {
       }
     }
 
-    // Filter out used questions
-    return allQuestions.filter(question => !usedInContext.includes(question));
-  }, [activeTab, activeChip, usedQuestions, contextConfig.dynamicQuestions, pathname]);
+    return questions.filter(q => !usedQuestions.includes(q));
+  };
 
   if (!isOpen) {
     return (
@@ -356,13 +217,6 @@ function UnifiedChatWidget() {
       <div
         className="unified-chat-panel"
         ref={focusTrapRef as React.RefObject<HTMLDivElement>}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{
-          transform: isDragging ? 'translateY(2px)' : 'translateY(0)',
-          transition: isDragging ? 'none' : 'transform 0.2s ease'
-        }}
       >
         {/* Header */}
         <header className="unified-chat-header">
@@ -382,37 +236,12 @@ function UnifiedChatWidget() {
           </button>
         </header>
 
-        {/* Tab Navigation */}
-        <div style={{
-          display: 'flex',
-          borderBottom: 'none',
-          backgroundImage: 'linear-gradient(45deg,#0d0cd0,#2726dd)',
-          boxShadow: '0 2px 8px rgba(39, 38, 221, 0.1)'
-        }} role="tablist" aria-label="Chat mode selection">
+        {/* Tab Navigation - Simplified */}
+        <div className="chat-tab-container-simple" role="tablist" aria-label="Chat mode selection">
           <button
             onClick={handlePortfolioTabClick}
             onKeyDown={(e) => handleTabKeyDown(e, 'portfolio')}
-            style={{
-              all: 'unset',
-              flex: '1',
-              padding: '14px 24px',
-              background: activeTab === 'portfolio'
-                ? 'linear-gradient(135deg, #0d0cd0, #2726dd)'
-                : '#ffffff',
-              color: activeTab === 'portfolio' ? '#ffffff' : '#1f2937',
-              fontWeight: activeTab === 'portfolio' ? '700' : '500',
-              fontSize: '16px',
-              cursor: 'pointer',
-              border: 'none',
-              borderRadius: '6px',
-              position: 'relative',
-              transform: activeTab === 'portfolio' ? 'translateY(-3px)' : 'translateY(0)',
-              boxShadow: activeTab === 'portfolio'
-                ? '0 4px 12px rgba(13, 12, 208, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-                : '0 2px 4px rgba(0, 0, 0, 0.1)',
-              textShadow: activeTab === 'portfolio' ? '0 1px 2px rgba(0, 0, 0, 0.3)' : 'none',
-              textAlign: 'center'
-            }}
+            className={`chat-tab-simple ${activeTab === 'portfolio' ? 'active' : ''}`}
             role="tab"
             aria-selected={activeTab === 'portfolio'}
             aria-controls="portfolio-panel"
@@ -425,27 +254,7 @@ function UnifiedChatWidget() {
           <button
             onClick={handleBlogTabClick}
             onKeyDown={(e) => handleTabKeyDown(e, 'blog')}
-            style={{
-              all: 'unset',
-              flex: '1',
-              padding: '14px 24px',
-              background: activeTab === 'blog'
-                ? 'linear-gradient(135deg, #0d0cd0, #2726dd)'
-                : '#ffffff',
-              color: activeTab === 'blog' ? '#ffffff' : '#1f2937',
-              fontWeight: activeTab === 'blog' ? '700' : '500',
-              fontSize: '16px',
-              cursor: 'pointer',
-              border: 'none',
-              borderRadius: '6px',
-              position: 'relative',
-              transform: activeTab === 'blog' ? 'translateY(-3px)' : 'translateY(0)',
-              boxShadow: activeTab === 'blog'
-                ? '0 4px 12px rgba(13, 12, 208, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-                : '0 2px 4px rgba(0, 0, 0, 0.1)',
-              textShadow: activeTab === 'blog' ? '0 1px 2px rgba(0, 0, 0, 0.3)' : 'none',
-              textAlign: 'center'
-            }}
+            className={`chat-tab-simple ${activeTab === 'blog' ? 'active' : ''}`}
             role="tab"
             aria-selected={activeTab === 'blog'}
             aria-controls="blog-panel"
@@ -467,24 +276,7 @@ function UnifiedChatWidget() {
           />
         )}
 
-        {/* Auto-dismissing Capability Toast */}
-        {showCapabilityToast && (
-          <div className="capability-toast">
-            <div className="capability-toast-content">
-              <span className="capability-toast-icon">💡</span>
-              <span className="capability-toast-text">
-                {getCurrentCapabilityStatement}
-              </span>
-              <button
-                className="capability-toast-close"
-                onClick={() => setShowCapabilityToast(false)}
-                aria-label="Dismiss capability information"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Removed: capability toast - over-engineered */}
 
 
         {/* Messages */}
@@ -527,7 +319,7 @@ function UnifiedChatWidget() {
               <div className="example-questions">
                 <h5>Try asking:</h5>
                 <div className="question-buttons" role="group" aria-label="Example questions">
-                  {getCurrentExampleQuestions.map((question, index) => (
+                  {getCurrentExampleQuestions().map((question, index) => (
                     <button
                       key={index}
                       className="example-question-btn"
@@ -568,11 +360,11 @@ function UnifiedChatWidget() {
               ))}
 
               {/* Persistent Example Questions */}
-              {getCurrentExampleQuestions.length > 0 && (
+              {getCurrentExampleQuestions().length > 0 && (
                 <div className="example-questions persistent">
                   <h5>Try asking:</h5>
                   <div className="question-buttons" role="group" aria-label="Example questions">
-                    {getCurrentExampleQuestions.map((question, index) => (
+                    {getCurrentExampleQuestions().map((question, index) => (
                       <button
                         key={index}
                         className="example-question-btn"
@@ -634,65 +426,13 @@ function UnifiedChatWidget() {
               <span aria-hidden="true">➤</span>
             </button>
           </div>
-          {/* COMMENTED OUT FOR SPACE - Character count and transparency footer */}
-          {/* <div className="input-footer">
-            <div id="character-count" className="character-count">
-              <small aria-live="polite">{inputValue.length}/500 characters</small>
-            </div>
-            <div id="trust-info" className="trust-footer">
-              <small>
-                🤖 AI-generated responses • Sources cited when available • Accuracy not guaranteed •
-                <button
-                  type="button"
-                  className="transparency-link"
-                  onClick={() => setShowTransparencyInfo(!showTransparencyInfo)}
-                  aria-expanded={showTransparencyInfo}
-                  aria-controls="transparency-details"
-                >
-                  AI transparency info
-                </button>
-              </small>
-            </div>
-          </div> */}
+          {/* Removed: character count and transparency footer - over-engineered */}
           <div id="chat-input-help" className="sr-only">
             Press Enter to send your message, or Shift+Enter for a new line. Maximum 500 characters.
           </div>
         </footer>
 
-        {/* AI Transparency Details */}
-        {showTransparencyInfo && (
-          <div id="transparency-details" className="transparency-panel" aria-live="polite">
-            <div className="transparency-content">
-              <h4>🤖 AI Transparency Information</h4>
-              <div className="transparency-grid">
-                <div className="transparency-item">
-                  <h5>What this AI does</h5>
-                  <p>This AI assistant answers questions using Austin's portfolio content and blog posts. Responses are generated by artificial intelligence, not Austin personally.</p>
-                </div>
-                <div className="transparency-item">
-                  <h5>Data processing</h5>
-                  <p>Your questions are processed to generate responses. No personal data is stored permanently. Conversations are not saved between sessions.</p>
-                </div>
-                <div className="transparency-item">
-                  <h5>Limitations</h5>
-                  <p>AI responses may contain errors. Information should be verified independently. The AI cannot provide legal, financial, or medical advice.</p>
-                </div>
-                <div className="transparency-item">
-                  <h5>Contact</h5>
-                  <p>For business inquiries or to speak with Austin directly, use the contact information in the site header.</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="transparency-close"
-                onClick={() => setShowTransparencyInfo(false)}
-                aria-label="Close transparency information"
-              >
-                ✕ Close
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Removed: transparency panel - over-engineered */}
       </div>
     </div>
   );

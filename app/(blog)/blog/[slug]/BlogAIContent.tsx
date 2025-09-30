@@ -201,11 +201,21 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
     [loading, cachedContentLoading, questionsLoading]
   );
 
+  const loadAdditionalQuestions = async () => {
+    // Disabled: Questions are now handled by the chat widget
+    setQuestionsLoaded(true);
+  };
+
+  const retryLoadQuestions = () => {
+    setQuestionsLoaded(false);
+    setQuestionsError(null);
+    loadAdditionalQuestions();
+  };
+
   const handleRetry = useCallback((type: ContentType) => {
     clearError(type);
     generateContent(type);
   }, [clearError, generateContent]);
-
 
   // Helper function to determine if error should have retry option
   const getErrorRetryProps = (cacheKey: string) => {
@@ -238,18 +248,6 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
 
     return cleaned.trim();
   }, []);
-
-
-  const loadAdditionalQuestions = async () => {
-    // Disabled: Questions are now handled by the chat widget
-    setQuestionsLoaded(true);
-  };
-
-  const retryLoadQuestions = () => {
-    setQuestionsLoaded(false);
-    setQuestionsError(null);
-    loadAdditionalQuestions();
-  };
 
   useEffect(() => {
     setIsClient(true);
