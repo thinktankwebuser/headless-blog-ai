@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { fetchPostBySlug, formatDate, cleanWordPressContent } from '@/lib/wp';
 import { processBlogContent } from '@/lib/blog-processor';
-import ShareButtons from '@/components/ShareButtons';
+import ShareButtons from '@/components/ClientOnlyShareButtons';
 import BlogAIContent from './BlogAIContent';
 
 export const revalidate = 300; // 5 minutes ISR
