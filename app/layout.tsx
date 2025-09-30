@@ -54,7 +54,7 @@ export default function RootLayout({
           </div>
         </footer>
 
-        <UnifiedChatWidget />
+        {/* <UnifiedChatWidget /> */}
         <ContactModal
           isOpen={isContactModalOpen}
           onClose={() => setIsContactModalOpen(false)}

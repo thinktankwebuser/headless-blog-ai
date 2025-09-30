@@ -343,6 +343,18 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
 
   return (
     <div className="blog-content">
+      {/* Floating Q&A Button */}
+      {!activePopover && (
+        <button
+          className="smart-qa-launcher"
+          onClick={() => handleButtonClick('chat')}
+          aria-label="Ask AI about this blog post"
+          title="Q&A with AI"
+        >
+          💬
+        </button>
+      )}
+
       {/* Chat Modal for both mobile and desktop */}
       {isClient && activePopover === 'chat' && (
         <div
@@ -359,7 +371,7 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
         >
           <div className="blog-chat-modal" style={{ margin: '20px auto', maxWidth: '800px', width: 'calc(100% - 40px)' }}>
             <div className="chat-modal-header">
-              <h3>🤖 Austin's Blog Q&A with AI</h3>
+              <h3>Q&A with AI 🤖</h3>
               <button
                 onClick={handleModalClose}
                 className="chat-modal-close"

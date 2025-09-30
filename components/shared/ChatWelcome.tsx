@@ -21,7 +21,7 @@ const ChatWelcome: React.FC<ChatWelcomeProps> = ({
         <div className="message-assistant">
           <div className="message-content">
             Hi there 👋<br/>
-            You are now speaking with {authorName}'s {aiType} AI.<br/>
+            You are now speaking with our {aiType} AI.<br/>
             How can I help?
           </div>
         </div>
