@@ -625,7 +625,7 @@ function UnifiedChatWidget() {
               aria-invalid={false}
             />
             <button
-              onClick={handleSend}
+              onClick={() => handleSend()}
               disabled={!inputValue.trim() || loading}
               className="send-button"
               aria-label={loading ? 'Sending message...' : 'Send message'}
