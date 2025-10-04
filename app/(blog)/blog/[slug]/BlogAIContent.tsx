@@ -349,7 +349,7 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
           className="smart-qa-launcher"
           onClick={() => handleButtonClick('chat')}
           aria-label="Ask AI about this blog post"
-          title="Q&A with AI"
+          title="Ask me"
         >
           💬
         </button>
@@ -371,7 +371,7 @@ const BlogAIContent: React.FC<BlogAIContentProps> = ({ postContent, postSlug, or
         >
           <div className="blog-chat-modal" style={{ margin: '20px auto', maxWidth: '800px', width: 'calc(100% - 40px)' }}>
             <div className="chat-modal-header">
-              <h3>Q&A with AI 🤖</h3>
+              <h3>Ask me</h3>
               <button
                 onClick={handleModalClose}
                 className="chat-modal-close"

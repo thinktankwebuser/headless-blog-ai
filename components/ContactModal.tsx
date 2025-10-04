@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { siteConfig } from '@/lib/site-config';
 
 interface ContactModalProps {
@@ -21,6 +22,15 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
     <div className="contact-modal-backdrop" onClick={handleBackdropClick}>
       <div className="contact-modal">
         <div className="contact-modal-header">
+          <div className="contact-modal-profile-image">
+            <Image
+              src="/profile.jpeg"
+              alt={siteConfig.author.name}
+              width={120}
+              height={120}
+              style={{ borderRadius: '50%', objectFit: 'cover' }}
+            />
+          </div>
           <div className="contact-modal-title">
             <h2>{siteConfig.author.name}</h2>
             <p className="contact-modal-subtitle">{siteConfig.author.title}</p>
